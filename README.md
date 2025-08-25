@@ -1,4 +1,6 @@
-# Nuxt Minimal Starter
+# ForkedTower / FullParty
+
+[![Laravel Forge Site Deployment Status](https://img.shields.io/endpoint?url=https%3A%2F%2Fforge.laravel.com%2Fsite-badges%2F8b11325f-7712-445a-b691-4fc8c74ca672%3Fdate%3D1%26label%3D1%26commit%3D1&style=plastic)](https://forge.laravel.com/servers/953211/sites/2828661)
 
 Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
 
