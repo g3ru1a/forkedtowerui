@@ -61,7 +61,7 @@ function resetDate(){
 				</div>
 			</div>
 			<div class="w-full grid grid-cols-7 space-x-1">
-				<CalendarSlot v-for="day in getDays(year, month)" :key="day" :date="day"/>
+				<CalendarSlot v-for="day in getDays(year, month)" :key="day" :date="day" :showDay="true"/>
 			</div>
 		</UCard>
 	</div>

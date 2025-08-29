@@ -9,7 +9,7 @@ function biasedRandom() {
 	return Math.floor(r * 4)
 }
 
-const { date } = defineProps(['date']);
+const { date, showDay } = defineProps(['date', 'showDay']);
 const given_date = new Date(date);
 
 const is_today = computed(() => {
@@ -35,7 +35,8 @@ for(let i = 0; i < count; i++) {
 <template>
 	<div class="w-full border-l border-t rounded-lg dark:border-gray-700">
 		<div class="w-full h-full dark:bg-gray-900 rounded-lg p-1">
-			<p class="text-sm opacity-50">{{given_date.getDate()}} {{is_today ? ' - Today' : ''}}</p>
+			<slot/>
+			<p v-if="showDay" class="text-sm opacity-50">{{given_date.getDate()}} {{is_today ? ' - Today' : ''}}</p>
 			<div class="p-1 mt-2 space-y-2">
 				<CalendarSchedule v-for="schedule in schedules" :key="schedule.id" :data="schedule" />
 			</div>
