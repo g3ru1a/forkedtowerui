@@ -33,10 +33,10 @@ const items = computed(() => [{
 </script>
 
 <template>
-	<UHeader class="bg-elevated">
+	<UHeader class="bg-elevated" mode="slideover">
 		<template #left>
 			<NuxtLink to="/">
-				<LogoFP class="w-auto h-6 shrink-0" />
+				<LogoFP class="w-auto h-4 md:h-6 lg:h-10 shrink-0" />
 			</NuxtLink>
 		</template>
 

@@ -1,5 +1,9 @@
 <template>
 	<div>
-		Schedule
+		<Calendar />
 	</div>
 </template>
+<script setup lang="ts">
+
+
+</script>
