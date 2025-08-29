@@ -17,7 +17,7 @@ export function useAuth() {
 
     // Send user to your API's Discord redirect endpoint
     function login(redirect?: string) {
-        const url = new URL(`${import.meta.dev ? config.public.apiBaseDev : config.public.apiBase}/auth/redirect`)
+        const url = new URL(config.public.discordAuthUrl);
         if (redirect) url.searchParams.set('redirect', redirect) // optional
         window.location.href = url.toString()
     }

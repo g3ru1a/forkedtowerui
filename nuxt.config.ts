@@ -15,7 +15,8 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             apiBase: 'https://test.forkedtower.com/api', // API base,
-            apiBaseDev: 'http://ftapi.test/api'
+            apiBaseDev: 'http://ftapi.test/api',
+            discordAuthUrl: process.env.DISCORD_REDIRECT,
         }
     },
     typescript: {
