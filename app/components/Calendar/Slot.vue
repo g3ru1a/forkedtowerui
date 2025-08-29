@@ -38,8 +38,15 @@ for(let i = 0; i < count; i++) {
 			<slot/>
 			<p v-if="showDay" class="text-sm opacity-50">{{given_date.getDate()}} {{is_today ? ' - Today' : ''}}</p>
 			<div class="p-1 mt-2 space-y-2">
-				<CalendarSchedule v-for="schedule in schedules" :key="schedule.id" :data="schedule" />
+				<CalendarSchedule v-for="(schedule, i) in schedules" :key="schedule.id" :data="schedule"
+								  class="opacity-0 animate-fadeIn"
+								  :style="{ animationDelay: `${i * 250 + 500}ms` }"/>
 			</div>
 		</div>
 	</div>
 </template>
+
+<style>
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.animate-fadeIn { animation: fadeIn .5s ease-out forwards; }
+</style>

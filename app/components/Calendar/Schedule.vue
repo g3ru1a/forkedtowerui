@@ -1,4 +1,6 @@
 <script setup lang="ts">
+
+
 const {data} = defineProps(['data']);
 const { generateGradient } = useGradient();
 
@@ -13,7 +15,7 @@ const gradient = generateGradient(data['type']['color_hex'], 50);
 		<!-- border text -->
 		<span
 			class="absolute -top-2 left-4 dark:bg-gray-900 rounded-lg px-2 text-xs border border-[var(--border-color)]"
-			  :style="{ '--border-color': gradient[0] }">
+			:style="{ '--border-color': gradient[0] }">
 			{{data['type']['name']}}
 		  </span>
 		<div class="px-4 py-2 dark:bg-gray-800 rounded-md w-full flex flex-col items-center justify-start space-y-2">

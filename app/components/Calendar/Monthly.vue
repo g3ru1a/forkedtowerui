@@ -1,4 +1,18 @@
 <script setup lang="ts">
+import type {BreadcrumbItem} from "#ui/components/Breadcrumb.vue";
+
+const breadcrumbs = ref<BreadcrumbItem[]>([
+	{
+		label: 'Home',
+		icon: 'i-lucide-house',
+		to: '/home'
+	},
+	{
+		label: 'Schedule',
+		icon: 'lucide:calendar-search',
+		to: '/schedule'
+	}
+])
 const { getDays } = useCalendar();
 
 const today = new Date();
@@ -40,11 +54,8 @@ function resetDate(){
 <template>
 	<div class="min-h-screen w-full p-4">
 		<div class="w-full mb-2 flex flex-row items-center justify-between">
-			<div class="flex flex-row font-bold justify-start items-center space-x-2 text-primary">
-				<UIcon name="lucide:calendar" size="24"/>
-				<p class="text-center text-3xl">
-					Raid Schedule
-				</p>
+			<div class="flex flex-row font-bold justify-center items-center space-x-2 text-primary">
+				<UBreadcrumb :items="breadcrumbs" />
 			</div>
 			<div class="flex flex-row items-center justify-end space-x-2">
 				<UButton icon="lucide:chevron-left" size="sm" color="secondary" variant="ghost" @click="previousMonth" />
@@ -61,8 +72,16 @@ function resetDate(){
 				</div>
 			</div>
 			<div class="w-full grid grid-cols-7 space-x-1">
-				<CalendarSlot v-for="day in getDays(year, month)" :key="day" :date="day" :showDay="true"/>
+				<CalendarSlot v-for="(day, i) in getDays(year, month)" :key="day" :date="day" :showDay="true"
+							  class="opacity-0 animate-fadeIn"
+							  :style="{ animationDelay: `${i * 20}ms` }"/>
 			</div>
 		</UCard>
 	</div>
 </template>
+
+
+<style>
+@keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+.animate-fadeIn { animation: fadeIn .5s ease-out forwards; }
+</style>
