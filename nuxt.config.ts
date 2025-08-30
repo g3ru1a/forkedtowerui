@@ -16,7 +16,8 @@ export default defineNuxtConfig({
         public: {
             apiBase: 'https://test.forkedtower.com/api', // API base,
             apiBaseDev: 'http://ftapi.test/api',
-            discordAuthUrl: process.env.DISCORD_REDIRECT,
+            discordAuthUrl: 'https://discord.com/oauth2/authorize?client_id=1404489513681686588&response_type=code&redirect_uri=https%3A%2F%2Ftest.forkedtower.com%2Fauth%2Fcallback&scope=email+identify',
+            discordAuthUrlDev: 'https://discord.com/oauth2/authorize?client_id=1404489513681686588&response_type=code&redirect_uri=http%3A%2F%2Fftapi.test%2Fauth%2Fcallback&scope=email+identify'
         }
     },
     typescript: {
