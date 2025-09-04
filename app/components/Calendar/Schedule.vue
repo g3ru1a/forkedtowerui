@@ -3,15 +3,19 @@
 
 const {data} = defineProps(['data']);
 const { generateGradient } = useGradient();
+const router = useRouter();
 
 const random_slots = Math.floor(Math.random() * (parseInt(data['slots']) + 1));
 const gradient = generateGradient(data['type']['color_hex'], 50);
+
 </script>
 
 <template>
 	<div
 		class="relative pt-0.5 w-full rounded-md bg-gradient-to-br from-[var(--from)] to-[var(--to)] cursor-pointer transition-all duration-200 hover:scale-105 hover:z-10"
-		:style="{ '--from': gradient[0], '--to': gradient[1] }">
+		:style="{ '--from': gradient[0], '--to': gradient[1] }"
+		@click="router.push(`/schedules/${data['id']}`)"
+	>
 		<!-- border text -->
 		<span
 			class="absolute -top-2 left-4 dark:bg-gray-900 rounded-lg px-2 text-xs border border-[var(--border-color)]"

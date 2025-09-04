@@ -11,7 +11,7 @@
 		</template>
 
 		<template #right>
-			<UColorModeButton />
+<!--			<UColorModeButton />-->
 
 			<p class="text-muted text-sm space-x-2">
 				<ULink to="/tos">ToS</ULink>

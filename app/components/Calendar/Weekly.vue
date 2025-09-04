@@ -3,6 +3,11 @@ import type {BreadcrumbItem} from "#ui/components/Breadcrumb.vue";
 
 const { getDays } = useCalendar();
 
+const { direction = 'vertical', showHeader = true } = defineProps<{
+	direction?: 'vertical' | 'horizontal',
+	showHeader?: boolean,
+}>();
+
 const breadcrumbs = ref<BreadcrumbItem[]>([
 	{
 		label: 'Home',
@@ -80,16 +85,16 @@ function resetWeek() {
 </script>
 
 <template>
-	<div class="min-h-screen w-full p-4">
-		<UBreadcrumb :items="breadcrumbs" class="mb-4" />
-		<div class="w-full mb-2 flex flex-row items-center justify-center space-x-2">
+	<div class="w-full" :class="{ 'p-4': direction === 'vertical'}">
+		<UBreadcrumb v-if="showHeader" :items="breadcrumbs" class="mb-4" />
+		<div v-if="showHeader" class="w-full mb-2 flex flex-row items-center justify-center space-x-2">
 			<UButton icon="lucide:chevron-left" size="md" color="secondary" variant="ghost" @click="previousWeek" />
 			<p class="text-center text-2xl font-bold">{{ currentWeekString }}</p>
 			<UButton icon="lucide:chevron-right" size="md" color="secondary" variant="ghost" @click="nextWeek" />
 			<UButton label="Today" size="md" color="primary" variant="outline" @click="resetWeek" />
 		</div>
 		<UCard variant="outline" class="w-full bg-elevated flex flex-col">
-			<div class="w-full flex flex-col space-y-2">
+			<div class="w-full flex" :class="{ 'flex-col space-y-2': direction === 'vertical', 'flex-row': direction === 'horizontal' }">
 				<CalendarSlot v-for="(day, index) in weekDays" :key="day.getDate()" :date="day" :showDay="false">
 					<USeparator :label="weekdays[index]" />
 				</CalendarSlot>

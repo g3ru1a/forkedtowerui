@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { en, de, fr } from '@nuxt/ui/locale'
+import { en, de, fr, ja } from '@nuxt/ui/locale'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { useUserStore } from '~/stores/user'
 
@@ -9,9 +9,12 @@ const route = useRoute()
 const userStore = useUserStore()
 const { login, logout } = useAuth();
 
-console.log(userStore.user);
-
 const items = computed(() => [{
+	label: 'Home',
+	icon: 'lucide:house',
+	to: '/',
+	active: route.path.split('/').length === 2
+}, {
 	label: 'Schedule',
 	icon: 'lucide:calendar-search',
 	to: '/schedule',
@@ -56,6 +59,18 @@ const user_menu = ref<DropdownMenuItem[]>([
 		},
 	}
 ])
+
+const user_menu_navigation = computed(() => [{
+	label: 'Characters',
+	icon: 'lucide:calendar-search',
+	to: '/characters',
+	active: route.path.includes('/characters')
+}, {
+	label: 'Groups',
+	icon: 'lucide:trophy',
+	to: '/groups',
+	active: route.path.includes('/groups')
+}])
 </script>
 
 <template>
@@ -72,13 +87,13 @@ const user_menu = ref<DropdownMenuItem[]>([
 		/>
 
 		<template #right>
-			<UColorModeButton />
+<!--			<UColorModeButton />-->
 
-			<ULocaleSelect v-model="locale" :locales="[en, de, fr]" class="w-36" />
+			<ULocaleSelect v-model="locale" :locales="[en, de, fr, ja]" class="w-36" />
 
 			<UDropdownMenu
-				arrow
 				v-if="userStore.loggedIn"
+				arrow
 				:items="user_menu"
 				:ui="{
 					content: 'w-48 p-0',     // remove content padding
@@ -86,6 +101,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 					group: 'p-0'
 				  }"
 				size="xl"
+				class="hidden lg:inline-flex"
 			>
 				<div class="flex items-center justify-center cursor-pointer hover:bg-gray-900 rounded-xl px-2 py-1">
 					<UAvatar :src="userStore.user?.avatar_url" :chip="{ color: 'success', position: 'top-right' }" size="xl"/>
@@ -94,15 +110,19 @@ const user_menu = ref<DropdownMenuItem[]>([
 				<template #profile>
 					<div class="p-2 w-full bg-gradient-to-br from-violet-950 to-purple-700">
 						<UUser
+							class="w-full"
 							:name="userStore.user?.username"
 							:description="userStore.user?.handle"
 							:avatar="{
-						  src: userStore.user?.avatar_url
-						}"
+							  src: userStore.user?.avatar_url
+							}"
 							:chip="{
-					  color: 'success',
-					  position: 'top-right'
-				}"
+								  color: 'success',
+								  position: 'top-right'
+							}"
+							:ui="{
+								description: 'text-warning',
+							}"
 							size="xl"
 						/>
 					</div>
@@ -131,7 +151,6 @@ const user_menu = ref<DropdownMenuItem[]>([
 
 			<USeparator class="my-6" />
 
-
 			<UButton
 				v-if="!userStore.loggedIn"
 				label="Sign in"
@@ -141,6 +160,35 @@ const user_menu = ref<DropdownMenuItem[]>([
 				class="mb-3"
 				@click="login()"
 			/>
+
+			<UUser
+				v-if="userStore.loggedIn"
+				class="w-full"
+				:name="userStore.user?.username"
+				:description="userStore.user?.handle"
+				:avatar="{
+							  src: userStore.user?.avatar_url
+							}"
+				:chip="{
+								  color: 'success',
+								  position: 'top-right'
+							}"
+				:ui="{
+								description: 'text-warning',
+							}"
+				size="xl"
+			/>
+
+
+			<USeparator class="my-6" />
+
+			<UNavigationMenu
+				v-if="userStore.loggedIn"
+				:items="user_menu_navigation"
+				orientation="vertical"
+				class="-mx-2.5"
+			/>
+
 		</template>
 	</UHeader>
 </template>
