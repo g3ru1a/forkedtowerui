@@ -83,7 +83,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 		{
 			label: 'Add Character',
 			icon: 'i-lucide-plus',
-			kbds: ['meta', 'n']
+			// kbds: ['meta', 'n']
 		}
 	],
 	[
@@ -94,7 +94,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 		{
 			label: 'Dashboard',
 			icon: 'lucide:layout-dashboard',
-			kbds: ['meta', 'n']
+			// kbds: ['meta', 'n']
 		},
 		{
 			label: 'Invite users',
@@ -140,14 +140,14 @@ const user_menu = ref<DropdownMenuItem[]>([
 		},
 		{
 			label: 'Dashboard',
-			icon: 'lucide:layout-dashboard',
+			icon: 'i-lucide-shield',
 		},
 	],
 	[
 		{
 			label: 'Logout',
 			icon: 'i-lucide-log-out',
-			kbds: ['shift', 'meta', 'q']
+			// kbds: ['shift', 'meta', 'q']
 		}
 	]
 ]);
@@ -183,7 +183,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 				}"
 				class="hidden lg:inline-flex"
 			>
-				<div class="flex items-center justify-center cursor-pointer hover:bg-gray-900 rounded-xl px-2 py-1">
+				<div class="flex items-center justify-center cursor-pointer hover:bg-gray-900 active:bg-gray-900 rounded-xl px-2 py-1">
 					<UUser
 						class="w-full px-2 py-4"
 						:name="userStore.user?.username"
