@@ -19,12 +19,14 @@ const items = computed(() => [{
 	icon: 'lucide:calendar-search',
 	to: '/schedule',
 	active: route.path.includes('/schedule')
-}, {
-	label: 'Contest',
-	icon: 'lucide:trophy',
-	to: '/contest',
-	active: route.path.includes('/contest')
-}, {
+},
+// {
+// 	label: 'Contest',
+// 	icon: 'lucide:trophy',
+// 	to: '/contest',
+// 	active: route.path.includes('/contest')
+// },
+	{
 	label: 'Statistics',
 	icon: 'lucide:chart-no-axes-combined',
 	to: '/statistics',
@@ -40,25 +42,6 @@ const items = computed(() => [{
 	active: route.path.includes('/strats')
 }])
 
-const user_menu = ref<DropdownMenuItem[]>([
-	{
-		label: 'Profile',
-		icon: 'i-lucide-user',
-		slot: 'profile' as const,
-		disabled: true
-	},
-	{
-		label: 'Billing',
-		icon: 'i-lucide-credit-card'
-	},
-	{
-		label: 'Logout',
-		icon: 'lucide:log-out',
-		onSelect() {
-		    logout();
-		},
-	}
-])
 
 const user_menu_navigation = computed(() => [{
 	label: 'Characters',
@@ -70,7 +53,105 @@ const user_menu_navigation = computed(() => [{
 	icon: 'lucide:trophy',
 	to: '/groups',
 	active: route.path.includes('/groups')
-}])
+}, {
+		label: 'Logout',
+		icon: 'lucide:log-out',
+		onSelect() {
+			logout();
+		},
+	}
+])
+
+const user_menu = ref<DropdownMenuItem[]>([
+	[
+		{
+			label: 'Profile',
+			icon: 'i-lucide-user'
+		},
+	],
+	[
+		{
+			label: 'Characters',
+			type: 'label'
+		},
+		{
+			label: 'Giki Chomusuke',
+			avatar: {
+				src: 'https://img2.finalfantasyxiv.com/f/15cff6ad5af687333d4ae7545c7b4ec4_7206469080400ed57a5373d0a9c55c59fc0.jpg?1757013713'
+			},
+		},
+		{
+			label: 'Add Character',
+			icon: 'i-lucide-plus',
+			kbds: ['meta', 'n']
+		}
+	],
+	[
+		{
+			label: 'Groups',
+			type: 'label'
+		},
+		{
+			label: 'Dashboard',
+			icon: 'lucide:layout-dashboard',
+			kbds: ['meta', 'n']
+		},
+		{
+			label: 'Invite users',
+			icon: 'i-lucide-user-plus',
+			children: [
+				[
+					{
+						label: 'Discord',
+						icon: 'ic:baseline-discord'
+					},
+					{
+						label: 'Link',
+						icon: 'i-lucide-link'
+					}
+				],
+			]
+		},
+		{
+			label: 'My Groups',
+			icon: 'i-lucide-users',
+			children: [
+				[
+					{
+						label: 'FTEL',
+					},
+					{
+						label: 'SVSL',
+					}
+				],
+				[
+					{
+						label: 'New',
+						icon: 'i-lucide-plus'
+					}
+				]
+			]
+		},
+	],
+	[
+		{
+			label: 'Admin',
+			type: 'label'
+		},
+		{
+			label: 'Dashboard',
+			icon: 'lucide:layout-dashboard',
+		},
+	],
+	[
+		{
+			label: 'Logout',
+			icon: 'i-lucide-log-out',
+			kbds: ['shift', 'meta', 'q']
+		}
+	]
+]);
+
 </script>
 
 <template>
@@ -95,38 +176,32 @@ const user_menu_navigation = computed(() => [{
 				v-if="userStore.loggedIn"
 				arrow
 				:items="user_menu"
+				size="md"
 				:ui="{
-					content: 'w-48 p-0',     // remove content padding
-					item: 'first:p-0 p-2',             // remove item padding
-					group: 'p-0'
-				  }"
-				size="xl"
+					content: 'w-48',
+					item: 'rounded-md',
+				}"
 				class="hidden lg:inline-flex"
 			>
 				<div class="flex items-center justify-center cursor-pointer hover:bg-gray-900 rounded-xl px-2 py-1">
-					<UAvatar :src="userStore.user?.avatar_url" :chip="{ color: 'success', position: 'top-right' }" size="xl"/>
-					<UIcon name="i-lucide-chevron-down" class="ml-2" size="20" />
-				</div>
-				<template #profile>
-					<div class="p-2 w-full bg-gradient-to-br from-violet-950 to-purple-700">
-						<UUser
-							class="w-full"
-							:name="userStore.user?.username"
-							:description="userStore.user?.handle"
-							:avatar="{
+					<UUser
+						class="w-full px-2 py-4"
+						:name="userStore.user?.username"
+						:description="userStore.user?.handle"
+						:avatar="{
 							  src: userStore.user?.avatar_url
 							}"
-							:chip="{
+						:chip="{
 								  color: 'success',
 								  position: 'top-right'
 							}"
-							:ui="{
+						:ui="{
 								description: 'text-warning',
 							}"
-							size="xl"
-						/>
-					</div>
-				</template>
+						size="xl"
+					/>
+					<UIcon name="i-lucide-chevron-down" class="ml-2" size="20" />
+				</div>
 			</UDropdownMenu>
 
 
