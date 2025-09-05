@@ -7,6 +7,7 @@ appConfig.ui.colors.primary = 'purple';
 
 <template>
 	<UApp :locale="locales[locale]">
+		<NuxtLoadingIndicator />
 		<NuxtLayout>
 			<NuxtPage />
 		</NuxtLayout>
