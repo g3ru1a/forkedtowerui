@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { en, de, fr, ja } from '@nuxt/ui/locale'
+import type {DBCharacter} from "#shared/types/models";
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { useUserStore } from '~/stores/user'
 
 const locale = ref('en')
-
+const characterLink = ref();
 const route = useRoute()
 const userStore = useUserStore()
+const {getCharacters} = useCharacters();
 const { login, logout } = useAuth();
+const chars = ref<DBCharacter[]>([]);
 
-const items = computed(() => [{
+const items = computed(() => [
+	{
 	label: 'Home',
 	icon: 'lucide:house',
 	to: '/',
@@ -20,53 +24,55 @@ const items = computed(() => [{
 	to: '/schedule',
 	active: route.path.includes('/schedule')
 },
-// {
-// 	label: 'Contest',
-// 	icon: 'lucide:trophy',
-// 	to: '/contest',
-// 	active: route.path.includes('/contest')
-// },
 	{
 	label: 'Statistics',
 	icon: 'lucide:chart-no-axes-combined',
 	to: '/statistics',
 	active: route.path.includes('/statistics')
-}, {
-	label: 'Strats',
-	to: '/strats',
-	icon: 'i-lucide-book-open',
-	badge: {
-		label: 'New',
-		color: 'primary' as const
-	},
-	active: route.path.includes('/strats')
-}])
-
-
-const user_menu_navigation = computed(() => [{
-	label: 'Characters',
-	icon: 'lucide:calendar-search',
-	to: '/characters',
-	active: route.path.includes('/characters')
-}, {
-	label: 'Groups',
-	icon: 'lucide:trophy',
-	to: '/groups',
-	active: route.path.includes('/groups')
-}, {
-		label: 'Logout',
-		icon: 'lucide:log-out',
-		onSelect() {
-			logout();
+},
+	{
+		label: 'Strats',
+		active: route.path.includes('/strats'),
+		icon: 'i-lucide-book-open',
+		badge: {
+			label: 'New',
+			color: 'primary' as const
 		},
-	}
+		children: [
+			{
+				label: 'Forked Tower: ABBA',
+				description: 'Most Common Strats for Forked Tower.',
+				icon: 'lucide:notepad-text',
+				to: '/strats/abba'
+			},
+			{
+				label: 'Forked Tower: FTEL',
+				description: 'Our own variation of the ABBA strat.',
+				icon: 'lucide:notepad-text',
+				to: '/strats/ftel'
+			},
+			{
+				label: 'Speed Strats',
+				icon: 'lucide:fast-forward',
+				description: 'Sometimes you just gotta go fast.',
+				to: '/strats/speed'
+			},
+			{
+				label: 'Greed Strats',
+				icon: 'lucide:sword',
+				description: 'Squeezing every last drop of damage.',
+				to: '/strats/greed'
+			},
+		]
+	},
 ])
 
 const user_menu = ref<DropdownMenuItem[]>([
 	[
 		{
 			label: 'Profile',
-			icon: 'i-lucide-user'
+			icon: 'i-lucide-user',
+			to: '/profile'
 		},
 	],
 	[
@@ -75,14 +81,11 @@ const user_menu = ref<DropdownMenuItem[]>([
 			type: 'label'
 		},
 		{
-			label: 'Giki Chomusuke',
-			avatar: {
-				src: 'https://img2.finalfantasyxiv.com/f/15cff6ad5af687333d4ae7545c7b4ec4_7206469080400ed57a5373d0a9c55c59fc0.jpg?1757013713'
-			},
-		},
-		{
 			label: 'Add Character',
 			icon: 'i-lucide-plus',
+			onSelect: () => {
+				characterLink.value.openModal();
+			}
 			// kbds: ['meta', 'n']
 		}
 	],
@@ -147,10 +150,32 @@ const user_menu = ref<DropdownMenuItem[]>([
 		{
 			label: 'Logout',
 			icon: 'i-lucide-log-out',
-			// kbds: ['shift', 'meta', 'q']
+			onSelect: () => {
+				logout();
+			}
 		}
 	]
 ]);
+
+onMounted(() => {
+	getCharacters(true).then(characters => {
+		if(!characters) return;
+		chars.value = characters;
+		user_menu.value = user_menu.value.with(
+			1,
+			[
+				...user_menu.value[1]!.slice(0, -1),
+				...characters.map((c): DropdownMenuItem => ({
+					label: c.name + ' - ' + c.world,
+					avatar: { src: c.avatar_url },
+					to: '/characters/' + c.id,
+					slot: 'character' as const
+				})),
+				user_menu.value[1]!.at(-1)!,
+			]
+		);
+	});
+})
 
 </script>
 
@@ -178,7 +203,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 				:items="user_menu"
 				size="md"
 				:ui="{
-					content: 'w-48',
+					content: 'min-w-48',
 					item: 'rounded-md',
 				}"
 				class="hidden lg:inline-flex"
@@ -204,7 +229,7 @@ const user_menu = ref<DropdownMenuItem[]>([
 				</div>
 			</UDropdownMenu>
 
-
+			<CharacterLink ref="characterLink"/>
 
 			<UButton
 				v-if="!userStore.loggedIn"
@@ -257,12 +282,12 @@ const user_menu = ref<DropdownMenuItem[]>([
 
 			<USeparator class="my-6" />
 
-			<UNavigationMenu
-				v-if="userStore.loggedIn"
-				:items="user_menu_navigation"
-				orientation="vertical"
-				class="-mx-2.5"
-			/>
+<!--			<UNavigationMenu-->
+<!--				v-if="userStore.loggedIn"-->
+<!--				:items="user_menu"-->
+<!--				orientation="vertical"-->
+<!--				class="-mx-2.5"-->
+<!--			/>-->
 
 		</template>
 	</UHeader>
