@@ -4,6 +4,8 @@ import type {NodestoneUser} from "#shared/types/nodestone";
 import type {CharacterVerification, DBCharacter} from "#shared/types/models";
 
 const { $api }=useNuxtApp();
+const {getCharacters} = useCharacters();
+const toast = useToast()
 
 const steps: StepperItem[] = [
 	{
@@ -28,6 +30,7 @@ const step1loading = ref(false);
 const step2loading = ref(false);
 
 const open = ref(false)
+const errored = ref(false);
 
 function finish(){
 	character.value = null;
@@ -35,6 +38,7 @@ function finish(){
 	while(stepper.value?.hasPrev){
 		stepper.value.prev();
 	}
+	getCharacters();
 	open.value = false;
 }
 
@@ -64,10 +68,26 @@ async function verifyCharacter(){
 		step2loading.value = false;
 		if(response.data.status) {
 			stepper.value?.next();
+		}else{
+			errored.value = true;
+			toast.add({
+				title: 'Error',
+				description: 'Couldn\'t find the code on your lodestone.',
+				color: 'error'
+			})
 		}
 	}catch (e){
 		console.log(e)
 	}
+}
+
+function copyCode(code: string){
+	navigator.clipboard.writeText(code);
+	toast.add({
+		title: 'Code Copied',
+		description: 'The code has been copied to your clipboard',
+		color: 'info'
+	})
 }
 
 function openModal() {
@@ -113,9 +133,16 @@ defineExpose({ openModal });
 									Add the code below to <ULink :to="`https://na.finalfantasyxiv.com/lodestone/character/${fullCharacter.lodestone_id}`" active target="_blank">your lodestone <UIcon name="i-lucide-external-link" size="12" /></ULink> description then click Verify
 								</p>
 							</div>
-							<div class="mx-auto w-1/2 font-bold text-center text-3xl py-4 bg-elevated rounded-lg">
+							<div
+								class="mx-auto min-w-1/2 px-4 flex flex-row items-center justify-center font-bold text-center text-3xl py-4 bg-elevated rounded-lg"
+								:class="{'border-b border-error': errored}"
+							>
 								<p>{{fullCharacter.verification_code}}</p>
+								<UButton icon="lucide:copy" variant="ghost" color="neutral" @click="copyCode(fullCharacter.verification_code)"/>
 							</div>
+							<p v-if="errored" class="text-xs text-center text-error">
+								Make sure the code you entered is correct
+							</p>
 							<div class="w-full flex flex-row items-center justify-center gap-2">
 								<UButton label="Back" variant="outline" color="neutral" trailing-icon="i-lucide-arrow-left" @click="stepper?.prev()" />
 								<UButton label="Verify" :loading="step2loading" variant="outline" trailing-icon="i-lucide-arrow-right" @click="verifyCharacter()" />

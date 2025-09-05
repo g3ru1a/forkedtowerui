@@ -75,5 +75,8 @@ watch(value, async (newValue, oldValue) => {
 				/>
 			</div>
 		</div>
+		<div v-if="!loading && data.length === 0 && searched" class="mt-4 w-full flex flex-col max-h-48 overflow-y-scroll">
+			<p class="text-muted text-center text-sm">No Results</p>
+		</div>
 	</div>
 </template>
