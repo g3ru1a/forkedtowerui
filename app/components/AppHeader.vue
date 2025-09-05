@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { en, de, fr, ja } from '@nuxt/ui/locale'
 import type {DBCharacter} from "#shared/types/models";
-import type { DropdownMenuItem } from '@nuxt/ui'
+import type {DropdownMenuItem, NavigationMenuItem} from '@nuxt/ui'
 import { useUserStore } from '~/stores/user'
 
 const locale = ref('en')
@@ -263,7 +263,7 @@ onMounted(() => {
 
 			<UUser
 				v-if="userStore.loggedIn"
-				class="w-full"
+				class="w-full mb-2"
 				:name="userStore.user?.username"
 				:description="userStore.user?.handle"
 				:avatar="{
@@ -279,15 +279,12 @@ onMounted(() => {
 				size="xl"
 			/>
 
-
-			<USeparator class="my-6" />
-
-<!--			<UNavigationMenu-->
-<!--				v-if="userStore.loggedIn"-->
-<!--				:items="user_menu"-->
-<!--				orientation="vertical"-->
-<!--				class="-mx-2.5"-->
-<!--			/>-->
+			<UNavigationMenu
+				v-if="userStore.loggedIn"
+				:items="user_menu as NavigationMenuItem[]"
+				orientation="vertical"
+				class="-mx-2.5"
+			/>
 
 		</template>
 	</UHeader>
