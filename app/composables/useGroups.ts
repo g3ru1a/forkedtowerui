@@ -37,7 +37,7 @@ export function useGroups() {
 			server: false,
 			immediate: true
 		});
-		console.log(status.value, data.value, error.value)
+		// console.log(status.value, data.value, error.value)
 		if (status.value === 'idle') await refresh()            // start the request
 		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
 

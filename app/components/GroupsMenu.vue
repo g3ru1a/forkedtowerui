@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
 interface GroupDMI extends DropdownMenuItem {
-	badge?: {
-		label: string;
-	};
+	badge_text?: string;
 	badge_color?: string;
+	badge_gradient?: string;
 	owner_name?: string;
+	id?: string;
 }
 
 
-defineProps<{
+const {collapsed = false, prefill = null} = defineProps<{
 	collapsed?: boolean,
 	prefill?: string
 }>()
@@ -17,25 +17,31 @@ defineProps<{
 const groups = ref<Group[]>([]);
 const {getGroups} = useGroups();
 
-const selected = ref<GroupDMI>({});
+const selected = ref<GroupDMI | null>(null);
 
 const items = computed<GroupDMI[]>(() =>
 	groups.value.map((g): GroupDMI => ({
+		id: g.id,
 		label: g.name,
 		owner_name: g.owner.username,
-		badge: g.badge_text ? { label: g.badge_text } : undefined,
-		to: `/groups/${g.id}`,
+		badge_text: g.badge_text,
+		badge_color: g.color,
+		badge_gradient: g.gradient,
+		to: `/dashboard/${g.id}`,
 	}))
 );
 
-onMounted(async () => {
-	groups.value = await getGroups() ?? [];
-	if(!groups.value){
-		groups.value = [];
-		console.log("No groups found.")
-		return;
-	}
-})
+groups.value = await getGroups() ?? [];
+if(!groups.value){
+	groups.value = [];
+	console.log("No groups found.")
+}
+
+console.log(items.value)
+
+if(prefill){
+	selected.value = items.value.find(g => g.id == prefill) ?? {}
+}
 </script>
 
 <template>
@@ -63,7 +69,7 @@ onMounted(async () => {
 		>
 			<div class="w-full flex flex-row gap-2">
 				<div class="w-1/4 flex items-center justify-center">
-					<UBadge :label="selected?.badge_text" variant="outline"/>
+					<GroupBadge :text="selected?.badge_text" :color="selected?.badge_color" :gradient="selected?.badge_gradient" />
 				</div>
 				<div class="w-3/4 flex flex-col items-start justify-center text-left">
 					<p class="text-xs font-bold">{{selected?.label}}</p>
@@ -76,7 +82,7 @@ onMounted(async () => {
 		<template #item="{item}">
 			<div class="w-full flex flex-row gap-2">
 				<div class="w-1/4 flex items-center justify-center">
-					<UBadge :label="item.badge_text" variant="outline"/>
+					<GroupBadge :text="item?.badge_text" :color="item?.badge_color" :gradient="item?.badge_gradient" />
 				</div>
 				<div class="w-3/4 flex flex-col items-start justify-center text-left">
 					<p class="text-xs font-bold">{{item.label}}</p>
