@@ -5,73 +5,92 @@ const route = useRoute()
 const toast = useToast()
 
 const open = ref(false)
+const showNotice = ref(true);
 
-const links = [[{
-	label: 'Overview',
-	icon: 'i-lucide-activity',
-	to: '/dashboard',
-	onSelect: () => {
-		open.value = false
-	},
-	active: route.path.includes('/dashboard') && route.path.split('/').length === 3
-}, {
-	label: 'Characters',
-	icon: 'i-lucide-inbox',
-	to: '/inbox',
-	badge: '4',
-	onSelect: () => {
-		open.value = false
-	}
-}, {
-	label: 'Customers',
-	icon: 'i-lucide-users',
-	to: '/customers',
-	onSelect: () => {
-		open.value = false
-	}
-}, {
-	label: 'Settings',
-	to: '/settings',
-	icon: 'i-lucide-settings',
-	defaultOpen: true,
-	type: 'trigger',
-	children: [{
-		label: 'General',
-		to: '/settings',
-		exact: true,
-		onSelect: () => {
-			open.value = false
+const groupID = route.params.id as string;
+
+if(groupID == undefined) await navigateTo('/404');
+
+const links = [
+	[
+		{
+			label: 'Overview',
+			icon: 'i-lucide-activity',
+			to: '/dashboard/' + groupID,
+			onSelect: () => {
+				open.value = false
+			},
+			active: route.path.includes('/dashboard') && route.path.split('/').length === 4
+		},
+		{
+			label: 'Participants',
+			icon: 'i-lucide-users',
+			to: '/inbox',
+			badge: {
+				label: '835',
+				color: 'info',
+			},
+			onSelect: () => {
+				open.value = false
+			}
+		},
+	],
+	[
+		{
+			label: 'Schedules',
+			to: '/settings',
+			icon: 'lucide:calendar',
+		},
+		{
+			label: 'Registrations',
+			to: '/registrations',
+			icon: 'lucide:user-plus',
+			badge: {
+				label: '+143',
+				color: 'warning',
+			},
+		},
+	],
+	[
+		{
+			label: 'Members',
+			to: '/settings',
+			icon: 'lucide:square-user-round',
+		},
+		{
+			label: 'Statistics',
+			icon: 'lucide:bar-chart-4',
+			to: '/customers',
+			onSelect: () => {
+				open.value = false
+			}
+		},
+		{
+			label: 'Audit Log',
+			to: '/audit',
+			icon: 'lucide:file-clock',
+		},
+	],
+	[
+		{
+			label: 'Settings',
+			icon: 'i-lucide-settings',
+			to: '/settings',
+		},
+		{
+			label: 'Github',
+			icon: 'i-lucide-github',
+			to: 'https://github.com/g3ru1a/forkedtowerui',
+			target: '_blank'
+		},
+		{
+			label: 'Help & Support',
+			icon: 'i-lucide-info',
+			to: 'https://discord.gg/forkedtower',
+			target: '_blank'
 		}
-	}, {
-		label: 'Members',
-		to: '/settings/members',
-		onSelect: () => {
-			open.value = false
-		}
-	}, {
-		label: 'Notifications',
-		to: '/settings/notifications',
-		onSelect: () => {
-			open.value = false
-		}
-	}, {
-		label: 'Security',
-		to: '/settings/security',
-		onSelect: () => {
-			open.value = false
-		}
-	}]
-}], [{
-	label: 'Github',
-	icon: 'i-lucide-github',
-	to: 'https://github.com/g3ru1a/forkedtowerui',
-	target: '_blank'
-}, {
-	label: 'Help & Support',
-	icon: 'i-lucide-info',
-	to: 'https://discord.gg/forkedtower',
-	target: '_blank'
-}]] satisfies NavigationMenuItem[][]
+	]
+] satisfies NavigationMenuItem[][]
 
 const groups = computed(() => [{
 	id: 'links',
@@ -122,14 +141,16 @@ onMounted(async () => {
 			v-model:open="open"
 			collapsible
 			resizable
-			class="bg-elevated/25"
+			class="bg-muted/35"
 			:ui="{ footer: 'lg:border-t lg:border-default p-0' }"
 		>
 			<template #header="{ collapsed }">
-				<GroupsMenu :collapsed="collapsed" />
+				<LogoFP v-if="!collapsed" class="h-10 mx-auto" />
+				<LogoFPSquare v-if="collapsed" class="h-10 mx-auto" />
 			</template>
 
 			<template #default="{ collapsed }">
+				<GroupsMenu :collapsed="collapsed" class="bg-muted/50 shadow-2xl" :prefill="groupID"/>
 				<USeparator />
 				<UNavigationMenu
 					:collapsed="collapsed"
@@ -139,12 +160,49 @@ onMounted(async () => {
 					popover
 				/>
 
+				<USeparator />
 				<UNavigationMenu
 					:collapsed="collapsed"
 					:items="links[1]"
 					orientation="vertical"
 					tooltip
-					class="mt-auto"
+					popover
+				/>
+
+				<USeparator />
+				<UNavigationMenu
+					:collapsed="collapsed"
+					:items="links[2]"
+					orientation="vertical"
+					tooltip
+					popover
+				/>
+
+				<UCard
+					v-if="showNotice && !collapsed"
+					class="mt-auto bg-elevated shadow-xl"
+					:ui="{
+						body: 'p-0 sm:p-2'
+					}"
+				>
+					<div class="flex flex-col w-full">
+						<div class="w-full flex flex-col items-start justify-center">
+							<UBadge label="Notice" color="warning" class="mb-2" variant="soft" />
+						</div>
+						<p class="text-toned font-bold">Dashboard is in Beta</p>
+						<p class="text-xs text-muted">Please make sure to report any issues to <span class="text-primary">Giki (@yenpress)</span> on Discord.</p>
+						<div>
+							<UButton label="Open Discord" size="sm" trailing-icon="lucide:external-link" color="neutral" variant="outline" class="mt-2 w-auto" to="https://discord.gg/forkedtower" target="_blank" :ui="{trailingIcon: 'size-3'}"/>
+						</div>
+					</div>
+				</UCard>
+
+				<UNavigationMenu
+					:collapsed="collapsed"
+					:items="links[3]"
+					orientation="vertical"
+					tooltip
+					:class="{'mt-auto': !showNotice || collapsed}"
 				/>
 			</template>
 
@@ -155,6 +213,6 @@ onMounted(async () => {
 
 		<UDashboardSearch :groups="groups" />
 
-		<slot />
+		<slot/>
 	</UDashboardGroup>
 </template>

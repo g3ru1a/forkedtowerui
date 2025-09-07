@@ -40,6 +40,7 @@ function finish(){
 	}
 	getCharacters();
 	open.value = false;
+	reloadNuxtApp();
 }
 
 async function storeCharacter(){

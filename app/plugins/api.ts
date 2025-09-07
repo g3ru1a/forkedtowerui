@@ -9,9 +9,17 @@ export default defineNuxtPlugin(() => {
             const headers = new Headers(options.headers) // normalize to Headers API
             if (userStore.token) {
                 headers.set('Authorization', `Bearer ${userStore.token}`)
+				headers.set('Accept', 'application/json')
             }
             options.headers = headers
-        }
+        },
+		async onResponseError({response}) {
+			if(response.status === 401) {
+				userStore.clearToken();
+				userStore.clearUser();
+				console.error('Unauthorized')
+			}
+		}
     })
 
     return { provide: { api } }

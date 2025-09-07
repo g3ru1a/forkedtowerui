@@ -2,12 +2,16 @@
 import type {DBCharacter} from "#shared/types/models";
 import type {DropdownMenuItem, NavigationMenuItem} from '@nuxt/ui'
 import { useUserStore } from '~/stores/user'
+import CreateGroup from "~/components/CreateGroup.vue";
 
+const {getGroups} = useGroups();
 const characterLink = ref();
+const createGroup = ref();
 const userStore = useUserStore()
 const {getCharacters} = useCharacters();
 const { logout } = useAuth();
 const chars = ref<DBCharacter[]>([]);
+const groups = ref<Group[]>([]);
 const {mobile = false, collapsed = false, stretch = false} = defineProps<{mobile?: boolean, collapsed?: boolean, stretch?: boolean}>()
 
 const user_menu = ref<DropdownMenuItem[]>([
@@ -38,45 +42,11 @@ const user_menu = ref<DropdownMenuItem[]>([
 			type: 'label'
 		},
 		{
-			label: 'Dashboard',
-			icon: 'lucide:layout-dashboard',
-			to: '/dashboard'
-		},
-		{
-			label: 'Invite users',
-			icon: 'i-lucide-user-plus',
-			children: [
-				[
-					{
-						label: 'Discord',
-						icon: 'ic:baseline-discord'
-					},
-					{
-						label: 'Link',
-						icon: 'i-lucide-link'
-					}
-				],
-			]
-		},
-		{
-			label: 'My Groups',
-			icon: 'i-lucide-users',
-			children: [
-				[
-					{
-						label: 'FTEL',
-					},
-					{
-						label: 'SVSL',
-					}
-				],
-				[
-					{
-						label: 'New',
-						icon: 'i-lucide-plus'
-					}
-				]
-			]
+			label: 'Create',
+			icon: 'lucide:plus',
+			onSelect: () => {
+				createGroup.value.openModal();
+			}
 		},
 	],
 	[
@@ -100,25 +70,56 @@ const user_menu = ref<DropdownMenuItem[]>([
 	]
 ]);
 
-onMounted(() => {
-	getCharacters(true).then(characters => {
-		if(!characters) return;
-		chars.value = characters;
-		user_menu.value = user_menu.value.with(
-			1,
-			[
-				...user_menu.value[1]!.slice(0, -1),
-				...characters.map((c): DropdownMenuItem => ({
-					label: c.name + ' - ' + c.world,
-					avatar: { src: c.avatar_url },
-					to: '/characters/' + c.id,
-					slot: 'character' as const
-				})),
-				user_menu.value[1]!.at(-1)!,
-			]
-		);
-	});
-})
+groups.value = await getGroups() ?? []
+console.log(groups.value)
+if(groups.value.length > 0){
+	user_menu.value = user_menu.value.with(
+		2,
+		[
+			...user_menu.value[2]!.slice(0, -1),
+			...groups.value.map((g): DropdownMenuItem => ({
+				label: g.name,
+				children: [
+					{
+						label: 'Dashboard',
+						to: '/dashboard/' + g.id,
+						icon: 'lucide:layout-dashboard'
+					},
+					{
+						label: 'Page',
+						to: '/groups/' + g.id,
+						icon: 'lucide:file-text'
+					},
+					{
+						label: "Invite Member",
+						icon: 'lucide:mail',
+						onSelect(e: Event) {
+							// TODO Invite Logic
+						}
+					}
+				]
+			})),
+			user_menu.value[2]!.at(-1)!,
+		]
+	);
+}
+await getCharacters(true).then(characters => {
+	if(!characters) return;
+	chars.value = characters;
+	user_menu.value = user_menu.value.with(
+		1,
+		[
+			...user_menu.value[1]!.slice(0, -1),
+			...characters.map((c): DropdownMenuItem => ({
+				label: c.name + ' - ' + c.world,
+				avatar: { src: c.avatar_url },
+				to: '/characters/' + c.id,
+				slot: 'character' as const
+			})),
+			user_menu.value[1]!.at(-1)!,
+		]
+	);
+});
 
 </script>
 
@@ -128,14 +129,14 @@ onMounted(() => {
 			v-if="!mobile"
 			arrow
 			:items="user_menu"
-			size="md"
+			size="lg"
 			:ui="{
 					content: 'min-w-48' + stretch ? 'w-full' : '',
 					item: 'rounded-md',
 				}"
 			class="w-full hidden lg:inline-flex"
 		>
-			<div class="flex items-center justify-center cursor-pointer hover:bg-gray-900 active:bg-gray-900 rounded-xl px-2 py-1">
+			<div class="flex items-center justify-center cursor-pointer hover:bg-muted rounded-xl px-2 py-1">
 				<UUser
 					class="w-full px-2 py-4"
 					:name="userStore.user?.username"
@@ -157,6 +158,7 @@ onMounted(() => {
 		</UDropdownMenu>
 
 		<CharacterLink ref="characterLink"/>
+		<CreateGroup ref="createGroup" />
 
 		<UNavigationMenu
 			v-if="mobile"

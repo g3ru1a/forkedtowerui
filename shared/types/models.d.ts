@@ -15,3 +15,15 @@ export interface CharacterVerification {
 	character_id: string
 	status: boolean
 }
+
+export interface Group {
+	id: string,
+	owner: User,
+	name: string,
+	color: string,
+	badge_text: string,
+	gradient?: string,
+	discord_invite?: string,
+	private_path: string,
+	members?: User[]
+}
