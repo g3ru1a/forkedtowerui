@@ -133,9 +133,18 @@ await getCharacters(true).then(characters => {
 					content: 'min-w-48' + stretch ? 'w-full' : '',
 					item: 'rounded-md',
 				}"
-			class="w-full hidden lg:inline-flex"
+			class="w-full inline-flex my-2 lg:my-0"
 		>
-			<div class="max-h-14 overflow-hidden flex items-center justify-center cursor-pointer hover:bg-accented rounded-md px-2 py-1">
+			<div
+				v-if="collapsed" class="w-full p-2">
+				<UAvatar
+					class="w-full h-auto"
+					:src="userStore.user?.avatar_url" />
+			</div>
+			<div
+				v-if="!collapsed"
+				class="max-h-14 overflow-hidden flex items-center justify-center cursor-pointer hover:bg-accented rounded-md px-2 py-1">
+
 				<UUser
 					class="w-full px-2 py-4"
 					:name="userStore.user?.username"

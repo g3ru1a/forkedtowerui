@@ -4,6 +4,7 @@ import type {Group} from "#shared/types/models";
 
 export function useGroups() {
 	const userStore = useUserStore();
+	const groups = useState('groups', () => [] as Group[]);
 
 	const create_group_shape = ref<Group>({
 		id: '',
@@ -32,8 +33,9 @@ export function useGroups() {
 		}
 	}
 
-	async function getGroups(): Promise<Group[] | null> {
-		const {data, status, error, refresh } = await useAPI<APIResponse<Group[]>>('/groups', {
+	async function getGroups(force = false): Promise<Group[] | null> {
+		if (groups.value.length > 0 && !force) return groups.value;
+		const {data, status, error, refresh} = await useAPI<APIResponse<Group[]>>('/groups', {
 			server: false,
 			immediate: true
 		});
@@ -41,7 +43,8 @@ export function useGroups() {
 		if (status.value === 'idle') await refresh()            // start the request
 		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
 
-		if (error.value) return null
+		if (error.value || data.value == undefined) return null
+		groups.value = data.value.data;
 		return data.value?.data ?? null
 	}
 

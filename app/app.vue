@@ -5,7 +5,7 @@ const { locale } = useI18n();
 
 <template>
 	<UApp :locale="locales[locale]">
-		<NuxtLoadingIndicator />
+		<NuxtLoadingIndicator :color="'primary'" />
 		<NuxtLayout>
 			<NuxtPage />
 		</NuxtLayout>

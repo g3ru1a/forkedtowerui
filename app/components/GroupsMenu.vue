@@ -55,7 +55,6 @@ if(groupID.value){
 		v-if="groups.length > 0"
 		:items="items"
 		:content="{ align: 'center', collisionPadding: 12 }"
-		:ui="{ content: collapsed ? 'w-40' : 'w-(--reka-dropdown-menu-trigger-width)' }"
 	>
 		<UButton
 			v-bind="{
@@ -72,7 +71,7 @@ if(groupID.value){
 				trailingIcon: 'text-dimmed'
 			}"
 		>
-			<div class="w-full flex flex-row gap-2">
+			<div v-if="!collapsed" class="w-full flex flex-row gap-2">
 				<div class="w-1/4 flex items-center justify-center">
 					<GroupBadge :text="selected?.badge_text" :color="selected?.badge_color" :gradient="selected?.badge_gradient" />
 				</div>
@@ -80,6 +79,9 @@ if(groupID.value){
 					<p class="text-xs font-bold">{{selected?.label}}</p>
 					<p class="text-xs text-muted">{{selected?.owner_name}}</p>
 				</div>
+			</div>
+			<div v-else class="w-full flex flex-row items-center justify-center">
+				<GroupBadge :text="selected?.badge_text" :color="selected?.badge_color" :gradient="selected?.badge_gradient" />
 			</div>
 		</UButton>
 

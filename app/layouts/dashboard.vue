@@ -1,83 +1,100 @@
 <script setup lang="ts">
 import type { NavigationMenuItem } from '@nuxt/ui'
+import { useLocalePath } from '#i18n' // or '#imports' depending on your setup
+const localePath = useLocalePath()
 
 const route = useRoute()
+const router = useRouter()
 const toast = useToast()
 
 const open = ref(false)
 const showNotice = ref(true);
 
-const groupID = route.params.group_id as string;
+const groupID = computed(() => String(route.params.group_id ?? ''))
 
-if(groupID == undefined) await navigateTo('/404');
+if(groupID.value == undefined) await navigateTo('/404');
 
-const basePath = '/dashboard/' + groupID;
+const pathTo = (suffix: string) => `/dashboard/${groupID.value}${suffix}`
+const norm = (p: string) => p.replace(/\/+$/, '') // strip trailing slash
 
-const links = [
+const isActive = (toPath: string, exact = false) => {
+	const target = norm(router.resolve(localePath(toPath)).path)
+	const current = norm(route.path)
+	return exact ? current === target : current.includes(target)
+}
+
+const links = computed<NavigationMenuItem[][]>(() => [
 	[
 		{
 			label: 'Overview',
 			icon: 'i-lucide-activity',
-			to: basePath,
+			to: localePath(pathTo('/')),
 			onSelect: () => {
 				open.value = false
 			},
-			active: route.path.includes('/dashboard') && route.path.split('/').length === 4
+			active: isActive(pathTo('/'), true)
 		},
 		{
 			label: 'Participants',
 			icon: 'i-lucide-users',
-			to: basePath+'/participants',
+			to: localePath(pathTo('/participants')),
 			badge: {
 				label: '835',
 				color: 'info',
 			},
 			onSelect: () => {
 				open.value = false
-			}
+			},
+			active: isActive(pathTo('/participants')),
 		},
 	],
 	[
 		{
 			label: 'Schedules',
-			to: basePath+'/schedules',
+			to: localePath(pathTo('/schedules')),
 			icon: 'lucide:calendar',
+			active: isActive(pathTo('/schedules')),
 		},
 		{
 			label: 'Registrations',
-			to: basePath+'/registrations',
+			to: localePath(pathTo('/registrations')),
 			icon: 'lucide:user-plus',
 			badge: {
 				label: '+143',
 				color: 'warning',
 			},
+			active: isActive(pathTo('/registrations')),
 		},
 	],
 	[
 		{
 			label: 'Members',
-			to: basePath+'/members',
+			to: localePath(pathTo('/members')),
 			icon: 'lucide:square-user-round',
+			active: isActive(pathTo('/members')),
 		},
 		{
 			label: 'Statistics',
 			icon: 'lucide:bar-chart-4',
-			to: basePath+'/statistics',
+			to: localePath(pathTo('/statistics')),
 			onSelect: () => {
 				open.value = false
-			}
+			},
+			active: isActive(pathTo('/statistics')),
 		},
 		{
 			label: 'Audit Log',
-			to: basePath+'/audit',
+			to: localePath(pathTo('/audit')),
 			icon: 'lucide:file-clock',
+			active: isActive(pathTo('/audit')),
 		},
 	],
 	[
 		{
 			label: 'Settings',
 			icon: 'i-lucide-settings',
-			to: basePath+'/settings',
+			to: localePath(pathTo('/settings')),
+			active: isActive(pathTo('/settings')),
 		},
 		{
 			label: 'Github',
@@ -92,48 +109,35 @@ const links = [
 			target: '_blank'
 		}
 	]
-] satisfies NavigationMenuItem[][]
+]);
 
-const groups = computed(() => [{
-	id: 'links',
-	label: 'Go to',
-	items: links.flat()
-}, {
-	id: 'code',
-	label: 'Code',
-	items: [{
-		id: 'source',
-		label: 'View page source',
-		icon: 'i-simple-icons-github',
-		to: `https://github.com/nuxt-ui-templates/dashboard/blob/main/app/pages${route.path === '/' ? '/index' : route.path}.vue`,
-		target: '_blank'
-	}]
-}])
-
-onMounted(async () => {
-	const cookie = useCookie('cookie-consent')
-	if (cookie.value === 'accepted') {
-		return
-	}
-
-	toast.add({
-		title: 'We use first-party cookies to enhance your experience on our website.',
-		duration: 0,
-		close: false,
-		actions: [{
-			label: 'Accept',
-			color: 'neutral',
-			variant: 'outline',
-			onClick: () => {
-				cookie.value = 'accepted'
-			}
-		}, {
-			label: 'Opt out',
-			color: 'neutral',
-			variant: 'ghost'
-		}]
-	})
-})
+const goHome = () => {
+	router.push('/');
+}
+// onMounted(async () => {
+// 	const cookie = useCookie('cookie-consent')
+// 	if (cookie.value === 'accepted') {
+// 		return
+// 	}
+//
+// 	toast.add({
+// 		title: 'We use first-party cookies to enhance your experience on our website.',
+// 		duration: 0,
+// 		close: false,
+// 		actions: [{
+// 			label: 'Accept',
+// 			color: 'neutral',
+// 			variant: 'outline',
+// 			onClick: () => {
+// 				cookie.value = 'accepted'
+// 			}
+// 		}, {
+// 			label: 'Opt out',
+// 			color: 'neutral',
+// 			variant: 'ghost'
+// 		}]
+// 	})
+// })
 </script>
 
 <template>
@@ -147,8 +151,8 @@ onMounted(async () => {
 			:ui="{ footer: 'lg:border-t lg:border-default p-0' }"
 		>
 			<template #header="{ collapsed }">
-				<LogoFP v-if="!collapsed" class="h-10 mx-auto" />
-				<LogoFPSquare v-if="collapsed" class="h-10 mx-auto" />
+				<LogoFP v-if="!collapsed" class="h-10 mx-auto" @click="goHome()" />
+				<LogoFPSquare v-if="collapsed" class="h-10 mx-auto" @click="goHome()"  />
 			</template>
 
 			<template #default="{ collapsed }">
@@ -213,7 +217,6 @@ onMounted(async () => {
 			</template>
 		</UDashboardSidebar>
 
-		<UDashboardSearch :groups="groups" />
 
 		<slot/>
 	</UDashboardGroup>
