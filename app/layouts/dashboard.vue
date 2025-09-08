@@ -14,6 +14,10 @@ const groupID = computed(() => String(route.params.group_id ?? ''))
 
 if(groupID.value == undefined) await navigateTo('/404');
 
+const { findGroup } = useGroups();
+const group = await findGroup(groupID.value);
+if(!group) router.push('/404');
+
 const pathTo = (suffix: string) => `/dashboard/${groupID.value}${suffix}`
 const norm = (p: string) => p.replace(/\/+$/, '') // strip trailing slash
 

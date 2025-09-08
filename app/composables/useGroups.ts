@@ -48,5 +48,18 @@ export function useGroups() {
 		return data.value?.data ?? null
 	}
 
-	return { create_group_shape, createGroup, getGroups };
+	async function findGroup(id: string): Promise<Group | null> {
+		const {data, status, error, refresh} = await useAPI<APIResponse<Group>>('/groups/'+id, {
+			server: false,
+			immediate: true
+		});
+		// console.log(status.value, data.value, error.value)
+		if (status.value === 'idle') await refresh()            // start the request
+		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
+
+		if (error.value || data.value == undefined) return null
+		return data.value?.data ?? null
+	}
+
+	return { create_group_shape, createGroup, getGroups, findGroup };
 }
