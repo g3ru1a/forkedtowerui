@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from '@nuxt/ui'
+import { useLocalePath } from '#i18n' // or '#imports' depending on your setup
+const localePath = useLocalePath()
+
 interface GroupDMI extends DropdownMenuItem {
 	badge_text?: string;
 	badge_color?: string;
@@ -7,11 +10,11 @@ interface GroupDMI extends DropdownMenuItem {
 	owner_name?: string;
 	id?: string;
 }
+const route = useRoute();
+const groupID = computed(() => route.params.group_id);
 
-
-const {collapsed = false, prefill = null} = defineProps<{
+const {collapsed = false} = defineProps<{
 	collapsed?: boolean,
-	prefill?: string
 }>()
 
 const groups = ref<Group[]>([]);
@@ -27,7 +30,12 @@ const items = computed<GroupDMI[]>(() =>
 		badge_text: g.badge_text,
 		badge_color: g.color,
 		badge_gradient: g.gradient,
-		to: `/dashboard/${g.id}`,
+		onSelect() {
+			const to = localePath(`/dashboard/${g.id}`)
+			if (route.fullPath !== to) {
+				navigateTo(to, { external: true })
+			}
+		}
 	}))
 );
 
@@ -36,9 +44,8 @@ if(!groups.value){
 	groups.value = [];
 	console.log("No groups found.")
 }
-
-if(prefill){
-	selected.value = items.value.find(g => g.id == prefill) ?? {}
+if(groupID.value){
+	selected.value = items.value.find(g => g.id == groupID.value) ?? {}
 }
 </script>
 

@@ -152,7 +152,7 @@ onMounted(async () => {
 			</template>
 
 			<template #default="{ collapsed }">
-				<GroupsMenu :collapsed="collapsed" class="bg-muted/50 shadow-2xl" :prefill="groupID"/>
+				<GroupsMenu :collapsed="collapsed" class="bg-muted/50 shadow-2xl"/>
 				<USeparator />
 				<UNavigationMenu
 					:collapsed="collapsed"
