@@ -37,8 +37,6 @@ if(!groups.value){
 	console.log("No groups found.")
 }
 
-console.log(items.value)
-
 if(prefill){
 	selected.value = items.value.find(g => g.id == prefill) ?? {}
 }

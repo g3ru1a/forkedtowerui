@@ -71,7 +71,6 @@ const user_menu = ref<DropdownMenuItem[]>([
 ]);
 
 groups.value = await getGroups() ?? []
-console.log(groups.value)
 if(groups.value.length > 0){
 	user_menu.value = user_menu.value.with(
 		2,
@@ -136,7 +135,7 @@ await getCharacters(true).then(characters => {
 				}"
 			class="w-full hidden lg:inline-flex"
 		>
-			<div class="flex items-center justify-center cursor-pointer hover:bg-muted rounded-xl px-2 py-1">
+			<div class="max-h-14 overflow-hidden flex items-center justify-center cursor-pointer hover:bg-accented rounded-md px-2 py-1">
 				<UUser
 					class="w-full px-2 py-4"
 					:name="userStore.user?.username"

@@ -7,16 +7,18 @@ const toast = useToast()
 const open = ref(false)
 const showNotice = ref(true);
 
-const groupID = route.params.id as string;
+const groupID = route.params.group_id as string;
 
 if(groupID == undefined) await navigateTo('/404');
+
+const basePath = '/dashboard/' + groupID;
 
 const links = [
 	[
 		{
 			label: 'Overview',
 			icon: 'i-lucide-activity',
-			to: '/dashboard/' + groupID,
+			to: basePath,
 			onSelect: () => {
 				open.value = false
 			},
@@ -25,7 +27,7 @@ const links = [
 		{
 			label: 'Participants',
 			icon: 'i-lucide-users',
-			to: '/inbox',
+			to: basePath+'/participants',
 			badge: {
 				label: '835',
 				color: 'info',
@@ -38,12 +40,12 @@ const links = [
 	[
 		{
 			label: 'Schedules',
-			to: '/settings',
+			to: basePath+'/schedules',
 			icon: 'lucide:calendar',
 		},
 		{
 			label: 'Registrations',
-			to: '/registrations',
+			to: basePath+'/registrations',
 			icon: 'lucide:user-plus',
 			badge: {
 				label: '+143',
@@ -54,20 +56,20 @@ const links = [
 	[
 		{
 			label: 'Members',
-			to: '/settings',
+			to: basePath+'/members',
 			icon: 'lucide:square-user-round',
 		},
 		{
 			label: 'Statistics',
 			icon: 'lucide:bar-chart-4',
-			to: '/customers',
+			to: basePath+'/statistics',
 			onSelect: () => {
 				open.value = false
 			}
 		},
 		{
 			label: 'Audit Log',
-			to: '/audit',
+			to: basePath+'/audit',
 			icon: 'lucide:file-clock',
 		},
 	],
@@ -75,7 +77,7 @@ const links = [
 		{
 			label: 'Settings',
 			icon: 'i-lucide-settings',
-			to: '/settings',
+			to: basePath+'/settings',
 		},
 		{
 			label: 'Github',
