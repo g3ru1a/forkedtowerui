@@ -27,3 +27,23 @@ export interface Group {
 	private_path: string,
 	members?: User[]
 }
+
+export interface RunType {
+	id: string,
+	name: string,
+	color_hex: string,
+}
+
+export interface Schedule {
+	id: string,
+	description: string,
+	time: string,
+	date: string,
+	public: boolean,
+	registration_open: boolean,
+	registration_deadline: string,
+	slots: number,
+	host: User,
+	group: Group,
+	type: RunType
+}

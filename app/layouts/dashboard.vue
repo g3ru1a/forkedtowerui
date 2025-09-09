@@ -151,7 +151,7 @@ const goHome = () => {
 			v-model:open="open"
 			collapsible
 			resizable
-			class="bg-muted/35"
+			class="bg-gradient-to-t from-muted/70 to-muted/35"
 			:ui="{ footer: 'lg:border-t lg:border-default p-0' }"
 		>
 			<template #header="{ collapsed }">
