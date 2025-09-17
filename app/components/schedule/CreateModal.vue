@@ -1,11 +1,13 @@
 <script lang="ts" setup>
 import * as z from 'zod'
-import type {DropdownMenuItem, FormErrorEvent, FormSubmitEvent, RadioGroupItem} from '@nuxt/ui'
+import type {FormErrorEvent, FormSubmitEvent, RadioGroupItem} from '@nuxt/ui'
 import type {DBCharacter} from "#shared/types/models";
 
 const route = useRoute();
 const {findGroup} = useGroups()
 const {getTypes} = useRunTypes();
+const {getFights} = useFights();
+const {createSchedule} = useSchedules();
 
 
 const open = ref(false)
@@ -14,6 +16,8 @@ const open = ref(false)
 const types = await getTypes();
 const groupID: ComputedRef<string> = computed(() => route.params!.group_id as string);
 const group = await findGroup(groupID.value);
+const fights = await getFights();
+
 const formatted_types = computed(() => types?.map(t => ({
 	label: t.name,
 	value: t.id
@@ -34,7 +38,7 @@ const character_list = computed<DBCharacter[]>(() => {
 	return [...seen.values()]
 })
 
-// 3) Formatted for your UI
+// 3) Formatted for UI
 const formatted_characters = computed(() =>
 	character_list.value.map((char) => ({
 		label: char.name,
@@ -44,9 +48,13 @@ const formatted_characters = computed(() =>
 	}))
 )
 
-
-
-console.log(formatted_types, types, group);
+// 4) Formatted Fights
+const formatted_fights = computed(() =>
+	fights?.map(f => ({
+		label: f.name,
+		value: f.id
+	})) || []
+)
 
 //Prepare Form
 const _createScheduleSchema = z.object({
@@ -56,13 +64,13 @@ const _createScheduleSchema = z.object({
 	),
 	date: z.string().min(1, { message: 'Date is required' }),
 	registration_open: z.boolean().default(false),
-	duration: z.number().min(1, { message: 'Duration is required' }).max(99, { message: 'That\' too many hours' }),
+	duration_hours: z.number().min(1, { message: 'Duration is required' }).max(99, { message: 'That\' too many hours' }),
 	is_public: z.boolean().default(false),
 	type_id: z.string().min(1, { message: 'Type is required' }),
 	host_id: z.string().min(1, { message: 'Host is required' }),
 	description: z.string().max(255, { message: 'Notes can\'t be longer than 255 characters'}).optional(),
-	slots: z.number().max(48, { message: 'That\' too many slots' }).optional(),
-	content_id: z.string(),
+	seat_count: z.number().max(48, { message: 'That\' too many slots' }).optional(),
+	fight_id: z.string(),
 })
 
 type CreateScheduleSchema = z.output<typeof _createScheduleSchema>
@@ -71,19 +79,24 @@ const state = reactive<Partial<CreateScheduleSchema>>({
 	time: '18:00',
 	date: new Date().toISOString().substring(0, 10),
 	registration_open: false,
-	duration: 3,
+	duration_hours: 3,
 	is_public: true,
 	type_id: undefined,
 	host_id: undefined,
 	description: '',
-	slots: 48,
-	content_id: 'ftb',
+	seat_count: 48,
+	fight_id: formatted_fights.value && formatted_fights.value[0] ? formatted_fights.value[0].value : '',
 })
 
 const toast = useToast()
 async function onSubmit(event: FormSubmitEvent<CreateScheduleSchema>) {
-	toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-	console.log(event.data)
+	const result = await createSchedule(event.data);
+	if (result.success) {
+		toast.add({ title: 'Schedule Created', description: 'Your schedule has been created.', color: 'success' })
+		open.value = false
+	} else {
+		toast.add({ title: 'Couldn\'t create Schedule', description: result.message, color: 'error' })
+	}
 }
 
 async function onError(event: FormErrorEvent) {
@@ -108,7 +121,7 @@ const durations = ref<RadioGroupItem[]>([
 	}
 ])
 
-const slot_options = ref<RadioGroupItem[]>([
+const seat_count_options = ref<RadioGroupItem[]>([
 	{
 		label: 'Up to 8 Players',
 		id: 8,
@@ -125,29 +138,6 @@ const slot_options = ref<RadioGroupItem[]>([
 		label: 'Up to 48 Players',
 		id: 48,
 		description: 'Best for Baldesion Arsenal / Delubrum Reginae / Forked Tower'
-	}
-])
-
-const content = ref([
-	{
-		label: 'Forked Tower of Blood',
-		value: 'ftb'
-	},
-	{
-		label: 'Baldesion Arsenal',
-		value: 'ba'
-	},
-	{
-		label: 'Delubrum Reginae (Savage)',
-		value: 'drs'
-	},
-	{
-		label: 'The Cloud of Darkness (Chaotic)',
-		value: 'codc'
-	},
-	{
-		label: 'Ultimate??? Idk',
-		value: 'ult'
 	}
 ])
 
@@ -184,7 +174,7 @@ const content = ref([
 							<UFormField label="Duration" name="duration" description="How long are players expected to show up for" class="w-full">
 								<div class="flex flex-col md:flex-row items-center w-full gap-2">
 									<URadioGroup
-										v-model="state.duration"
+										v-model="state.duration_hours"
 										value-key="id"
 										:items="durations"
 										indicator="hidden"
@@ -194,7 +184,7 @@ const content = ref([
 										:ui="{ item: 'min-w-16 w-full h-auto p-2 border rounded-md' }"
 										class="w-full"
 									/>
-									<UInputNumber v-model="state.duration" :step="1" :min="1" :max="100" class="w-full md:max-w-28" size="lg" />
+									<UInputNumber v-model="state.duration_hours" :step="1" :min="1" :max="100" class="w-full md:max-w-28" size="lg" />
 								</div>
 							</UFormField>
 
@@ -221,7 +211,7 @@ const content = ref([
 								</div>
 							</UFormField>
 
-							<UFormField label="Host" description="Who will host the raid" class="w-full">
+							<UFormField label="Host" description="Who will host the raid" name="host_id" class="w-full">
 								<USelectMenu v-model="state.host_id" :items="formatted_characters" :avatar="formatted_characters.find(c => c.value == state.host_id)?.avatar" value-key="value" placeholder="Select a character" class="w-full"/>
 							</UFormField>
 						</div>
@@ -231,9 +221,9 @@ const content = ref([
 							<UFormField label="Player Count" name="slots" class="w-full row-span-2 mb-2">
 								<div class="flex flex-col md:flex-row items-center w-full gap-2">
 									<URadioGroup
-										v-model="state.slots"
+										v-model="state.seat_count"
 										value-key="id"
-										:items="slot_options"
+										:items="seat_count_options"
 										orientation="vertical"
 										variant="table"
 										class="w-full"
@@ -243,10 +233,10 @@ const content = ref([
 							</UFormField>
 
 							<UFormField label="Raid" description="What Content are you tackling on" class="w-full">
-								<USelectMenu v-model="state.content_id" :items="content" value-key="value" placeholder="Select tooling" class="w-full"/>
+								<USelectMenu v-model="state.fight_id" :items="formatted_fights" value-key="value" placeholder="Select tooling" class="w-full"/>
 							</UFormField>
 
-							<UFormField label="Prog Point" description="What's the goal of the raid" class="w-full">
+							<UFormField label="Prog Point" description="What's the goal of the raid" name="type_id" class="w-full">
 								<USelectMenu v-model="state.type_id" :items="formatted_types" value-key="value" placeholder="Select a prog point" class="w-full"/>
 							</UFormField>
 						</div>

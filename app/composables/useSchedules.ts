@@ -1,51 +1,44 @@
 // composables/useAuth.ts
-import { until } from '@vueuse/core'
-import type {Group, Schedule} from "#shared/types/models";
+import type {Schedule} from "#shared/types/models";
+import useScheduleRepository from "~/composables/repositories/useScheduleRepository";
 
 export function useSchedules() {
-	const userStore = useUserStore();
 	const route = useRoute();
 	const groupID = computed(() => route.params.group_id as string);
+
+	const scheduleRepo = useScheduleRepository();
 	const schedules = useState('schedules', () => [] as Schedule[]);
 
-	async function createSchedule(date: string, time: string, description: string, type: RunType, registration_open = false, registration_deadline: string | null = null): Promise<Schedule | null>{
-		const {data, status, error } = await useAPI<APIResponse<Schedule>>('/schedules', {
-			method: 'post',
-			body: {
-				data: date,
-				time: time,
-				description: description,
-				registration_open: registration_open,
-				registration_deadline: registration_deadline,
-				host_id: userStore.user!.id,
-				group_id: groupID.value,
-				type_id: type.id
-			}
-		});
-		if(status.value === 'success' && data.value){
-			console.log(data)
-			return data.value.data;
+	async function createSchedule(payload: Partial<Schedule>): Promise<Result<Schedule>>{
+		payload = {
+			...payload,
+			group_id: groupID.value,
+			public: payload.is_public
+		}
+		const result = await scheduleRepo.create(payload);
+		if(result.success && result.data != undefined) {
+			schedules.value.push(result.data);
+			return result;
 		}else{
-			console.error(error);
-			return null
+			return result;
 		}
 	}
 
-	async function getSchedules(page: number = 0, size: number = 10, force = false): Promise<Schedule[] | null> {
-		if (schedules.value.length > 0 && !force) return schedules.value;
-		const path = `/groups/${groupID.value}/schedules?current_page=${page}&per_page=${size}`;
-		const {data, status, error, refresh} = await useAPI<APIResponse<Schedule[]>>(path, {
-			server: false,
-			immediate: true
-		});
-		// console.log(status.value, data.value, error.value)
-		if (status.value === 'idle') await refresh()            // start the request
-		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
-
-		if (error.value || data.value == undefined) return null
-		schedules.value = data.value.data;
-		return data.value?.data ?? null
+	async function getSchedules(page: number = 0, size: number = 10, force = false): Promise<Result<Schedule[]>> {
+		if(!schedules.value || force) {
+			const result: Result<Schedule[]> = await scheduleRepo.all(groupID.value, page, size);
+			if(result.success && result.data != undefined) {
+				schedules.value = result.data;
+				return result;
+			}else{
+				return result;
+			}
+		}else return {
+			success: true,
+			data: schedules.value,
+			fromCache: true,
+		}
 	}
 
-	return { getSchedules, createSchedule };
+	return { schedules, getSchedules, createSchedule };
 }

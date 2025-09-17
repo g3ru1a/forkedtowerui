@@ -3,6 +3,12 @@ export default defineNuxtConfig({
     compatibilityDate: '2025-07-15',
     devtools: { enabled: true },
     css: ['~/assets/css/main.css'],
+	imports: {
+		dirs: [
+			// scan all composables within a given directory
+			'~/composables/**'
+		]
+	},
     modules: [
         '@nuxt/eslint',
         '@nuxt/test-utils',
