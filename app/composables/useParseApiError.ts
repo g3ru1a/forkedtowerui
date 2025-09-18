@@ -23,8 +23,10 @@ export default function <T>(error: unknown): Result<T> {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		code = Number((error as any).status)
 	}
-
-	if (typeof error === 'object' && error !== null && 'data' in error) {
+	if(code === 500){
+		message = 'Internal Server Error'
+	}
+	else if (typeof error === 'object' && error !== null && 'data' in error) {
 		if(isAPIError(error)){
 			// Laravel-style: errors is a Record<string, string[]>
 			const validationErrors = error.data.errors as Record<string, string[]>

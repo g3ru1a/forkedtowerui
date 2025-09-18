@@ -24,8 +24,8 @@ export function useSchedules() {
 		}
 	}
 
-	async function getSchedules(page: number = 0, size: number = 10, force = false): Promise<Result<Schedule[]>> {
-		if(!schedules.value || force) {
+	async function getSchedules(force = false, page: number = 0, size: number = 10): Promise<Result<Schedule[]>> {
+		if(!schedules.value || schedules.value.length == 0 || force) {
 			const result: Result<Schedule[]> = await scheduleRepo.all(groupID.value, page, size);
 			if(result.success && result.data != undefined) {
 				schedules.value = result.data;

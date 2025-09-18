@@ -23,7 +23,7 @@ const borderByColor: Record<
 </script>
 
 <template>
-	<div class="w-full h-full flex flex-col items-start justify-center p-4 bg-gradient-to-b from-muted to-muted/35 rounded-lg border-b-2" :class="borderByColor[color]">
+	<div class="w-full h-full flex flex-col items-stretch justify-between p-4 bg-gradient-to-b from-muted to-muted/35 rounded-lg border-b-2" :class="borderByColor[color]">
 		<div class="w-full flex flex-row gap-4 items-center justify-between">
 			<p v-if="title" class="text-sm opacity-80">{{title}}</p>
 			<UIcon v-if="icon" :name="icon" size="20" class=""/>

@@ -55,7 +55,7 @@ const formatted_fights = computed(() =>
 		value: f.id
 	})) || []
 )
-
+z.date().min(new Date())
 //Prepare Form
 const _createScheduleSchema = z.object({
 	time: z.string().regex(
@@ -63,7 +63,7 @@ const _createScheduleSchema = z.object({
 		'Use HH:MM (00–23:59)'
 	),
 	date: z.string().min(1, { message: 'Date is required' }),
-	registration_open: z.boolean().default(false),
+	require_registration: z.boolean().default(false),
 	duration_hours: z.number().min(1, { message: 'Duration is required' }).max(99, { message: 'That\' too many hours' }),
 	is_public: z.boolean().default(false),
 	type_id: z.string().min(1, { message: 'Type is required' }),
@@ -71,6 +71,29 @@ const _createScheduleSchema = z.object({
 	description: z.string().max(255, { message: 'Notes can\'t be longer than 255 characters'}).optional(),
 	seat_count: z.number().max(48, { message: 'That\' too many slots' }).optional(),
 	fight_id: z.string(),
+}).superRefine((data, ctx) => {
+	const now = new Date()
+	const datetimeUTC = new Date(`${data.date}T${data.time}:00Z`)
+	const nowUTCPlus5Min = new Date(now.getTime() + 5 * 60 * 1000)
+
+	// Date check (is today or later)
+	const dateOnly = new Date(`${data.date}T00:00:00Z`)
+	if (dateOnly < new Date(now.toISOString().split('T')[0] + 'T00:00:00Z')) {
+		ctx.addIssue({
+			path: ['date'],
+			message: 'Date must be today or in the future',
+			code: z.ZodIssueCode.custom
+		})
+	}
+
+	// Time check (combined date+time must be > now + 5min)
+	if (datetimeUTC <= nowUTCPlus5Min) {
+		ctx.addIssue({
+			path: ['time'],
+			message: 'Time must be at least 5 minutes from now',
+			code: z.ZodIssueCode.custom
+		})
+	}
 })
 
 type CreateScheduleSchema = z.output<typeof _createScheduleSchema>
@@ -78,7 +101,7 @@ type CreateScheduleSchema = z.output<typeof _createScheduleSchema>
 const state = reactive<Partial<CreateScheduleSchema>>({
 	time: '18:00',
 	date: new Date().toISOString().substring(0, 10),
-	registration_open: false,
+	require_registration: false,
 	duration_hours: 3,
 	is_public: true,
 	type_id: undefined,
@@ -190,11 +213,11 @@ const seat_count_options = ref<RadioGroupItem[]>([
 
 							<UFormField label="Access" description="Who can participate in the raid" class="w-full">
 								<div class="w-full grid grid-cols-2 gap-4 px-4 py-2">
-									<UFormField name="registration_open">
+									<UFormField name="require_registration">
 										<USwitch
-											v-model="state.registration_open"
-											:label="state.registration_open ? 'By Application' : 'Open'"
-											:description="state.registration_open ? 'People can apply to participate' : 'People can assign themselves'"
+											v-model="state.require_registration"
+											:label="state.require_registration ? 'By Application' : 'Open'"
+											:description="state.require_registration ? 'People can apply to participate' : 'People can assign themselves'"
 											size="sm"
 											class="w-full"
 										/>

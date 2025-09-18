@@ -85,7 +85,7 @@ export interface Schedule {
 	date: string,
 	public: boolean,
 	is_public: boolean,
-	registration_open: boolean,
+	require_registration: boolean,
 	duration_hours: number,
 	seat_count: number,
 	host?: DBCharacter,
