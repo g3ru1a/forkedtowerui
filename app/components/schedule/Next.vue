@@ -24,12 +24,12 @@
 		<div class="h-full grid grid-cols-2">
 			<ScheduleNextChunk class="col-span-1 border-b border-r border-muted/50" title="Seats" label="23/48" icon="i-lucide-users" />
 			<ScheduleNextChunk class="col-span-1 border-b border-muted/50" title="Registrations" label="12" icon="lucide:file-clock" />
-			<ScheduleNextChunk class="col-span-1 border-b border-r border-muted/50" title="Prog Point" icon="i-lucide-users">
+			<ScheduleNextChunk class="col-span-1 border-b border-r border-muted/50" title="Prog Point" icon="i-lucide-flag">
 				<template #label>
 					<UBadge color="neutral" variant="soft" label="FToB: Newbie" class="text-green-500 bg-elevated mt-2 p-2" />
 				</template>
 			</ScheduleNextChunk>
-			<ScheduleNextChunk class="col-span-1 border-b border-muted/50" title="Visibility" label="23/48" icon="i-lucide-users">
+			<ScheduleNextChunk class="col-span-1 border-b border-muted/50" title="Visibility" label="23/48" icon="i-lucide-eye">
 				<template #label>
 					<UBadge color="neutral" variant="soft" class="text-red-500 bg-elevated mt-2 p-2">
 						<p><UIcon name="i-lucide-lock"/> Private</p>
