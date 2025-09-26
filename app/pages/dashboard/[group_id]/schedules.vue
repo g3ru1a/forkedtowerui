@@ -10,6 +10,8 @@ const {getGroups} = useGroups();
 const groups = await getGroups();
 const group = computed(() => groups ? groups.find(g => g.id === useRoute().params.group_id) : null);
 
+const summary = await useSchedules().getScheduleSummary()
+
 const items = ref<BreadcrumbItem[]>([
 	{
 		label: group.value?.badge_text ?? 'Home',
@@ -40,15 +42,15 @@ const items = ref<BreadcrumbItem[]>([
 		</template>
 		<template #body>
 			<div class="h-screen overflow-y-scroll grid grid-flow-col grid-cols-6 grid-rows-6 2xl:grid-rows-8 gap-4">
-				<div class="col-span-4 row-span-1 gap-4 flex flex-row items-center justify-evenly">
+				<div v-if="summary.data" class="col-span-4 row-span-1 gap-4 flex flex-row items-center justify-evenly">
 					<div class="w-full h-full">
-						<DataCard title="Total Schedules" value="692" icon="i-lucide-calendar" />
+						<DataCard title="Total Schedules" :value="summary.data.total.toString() ?? '0'" icon="i-lucide-calendar" />
 					</div>
 					<div class="w-full h-full">
-						<DataCard title="Pending Registrations" value="12" icon="i-lucide-user-plus" color="warning"/>
+						<DataCard title="Pending Registrations" :value="summary.data.recruiting_count.toString() ?? '0'" icon="i-lucide-user-plus" color="warning"/>
 					</div>
 					<div class="w-full h-full">
-						<DataCard title="Pending Progress" value="4" icon="i-lucide-circle-alert" color="info"/>
+						<DataCard title="Pending Progress" :value="summary.data.active_schedules_count.toString() ?? '0'" icon="i-lucide-circle-alert" color="info"/>
 					</div>
 				</div>
 				<div class="col-span-4 row-span-5 2xl:row-span-7 space-y-4 p-2 bg-gradient-to-b from-muted/50 to-muted/35 shadow-xl rounded-lg border-b-2 border-muted"> <!-- bg-muted/35 -->

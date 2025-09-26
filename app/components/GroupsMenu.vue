@@ -88,7 +88,7 @@ if(groupID.value){
 
 		<template #item="{item}">
 			<div class="w-full flex flex-row gap-2">
-				<div class="w-1/4 flex items-center justify-center">
+				<div class="w-1/4 flex items-center justify-center mx-2">
 					<GroupBadge :text="item?.badge_text" :color="item?.badge_color" :gradient="item?.badge_gradient" />
 				</div>
 				<div class="w-3/4 flex flex-col items-start justify-center text-left">

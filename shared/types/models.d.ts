@@ -96,4 +96,13 @@ export interface Schedule {
 	group_id?: string,
 	type_id?: string,
 	fight_id?: string,
+	status: string,
+	recruiting_count?: number,
+	filled_count?: number,
+}
+
+export interface ScheduleSummary {
+	total: number,
+	recruiting_count: number,
+	active_schedules_count: number,
 }

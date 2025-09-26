@@ -1,5 +1,5 @@
 // composables/useAuth.ts
-import type {Schedule} from "#shared/types/models";
+import type {Schedule, ScheduleSummary} from "#shared/types/models";
 import useScheduleRepository from "~/composables/repositories/useScheduleRepository";
 
 export function useSchedules() {
@@ -40,5 +40,13 @@ export function useSchedules() {
 		}
 	}
 
-	return { schedules, getSchedules, createSchedule };
+	async function getScheduleSummary(): Promise<Result<ScheduleSummary>> {
+		return scheduleRepo.summary(groupID.value);
+	}
+
+	async function getNextSchedule(): Promise<Result<Schedule>> {
+		return scheduleRepo.next(groupID.value);
+	}
+
+	return { schedules, getSchedules, createSchedule, getNextSchedule, getScheduleSummary };
 }

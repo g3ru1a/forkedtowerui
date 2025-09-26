@@ -15,8 +15,41 @@ const data = await getSchedules(true);
 console.log(data)
 
 const columns: TableColumn<Schedule>[] = [
+
 	{
-		id: 'view'
+		accessorKey: 'status',
+		header: 'Status',
+		cell: ({ row }) => {
+			let color = '#a1a1a1';
+			switch (row.original.status) {
+				case 'planned':
+					color = '#facc15'; // yellow-400
+					break;
+				case 'scheduled':
+					color = '#60a5fa'; // blue-400
+					break;
+				case 'recruiting':
+					color = '#34d399'; // emerald-400
+					break;
+				case 'ongoing':
+					color = '#f59e0b'; // amber-500
+					break;
+				case 'finished':
+					color = '#a78bfa'; // violet-400
+					break;
+				case 'cancelled':
+					color = '#f87171'; // red-400
+					break;
+			}
+			const gradient = useGradient().generateGradient(color, 20);
+			return h('div', {class: 'flex flex-row items-center gap-2'}, [
+				h('p', {
+						class: 'text-sm'+ ` bg-gradient-to-r bg-clip-text text-transparent`,
+						style: `background-image: linear-gradient(90deg, ${gradient[0]}, ${gradient[1]});`
+					},
+					String(row.original.status).charAt(0).toUpperCase() + String(row.original.status).slice(1)),
+			]);
+		}
 	},
 	{
 		accessorKey: 'host',
@@ -105,6 +138,12 @@ const pagination = ref({
 
 function getDropdownActions(schedule: Schedule): DropdownMenuItem[][] {
 	return [
+		[
+			{
+				label: 'View',
+				icon: 'material-symbols:open-in-new',
+			},
+		],
 		[
 			{
 				label: 'Edit',
