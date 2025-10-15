@@ -1,6 +1,6 @@
 // composables/useAuth.ts
 
-import type {DBCharacter, Group} from "#shared/types/models";
+import type {DBCharacter} from "#shared/types/models";
 import {until} from "@vueuse/core";
 
 export function useCharacters() {

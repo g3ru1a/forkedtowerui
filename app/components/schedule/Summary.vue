@@ -1,25 +1,31 @@
 <script  lang="ts" setup="">
 
-const next = await useSchedules().getNextSchedule();
+const {schedule} = defineProps<{
+	schedule: Schedule
+}>();
+
+const next = {
+	success: true,
+	data: schedule
+};
 
 console.log(next);
 
 const data = next.success ? next.data : null;
 
-const hour = data ? new Date(data!.time).toLocaleString('en-IE', {
+const hour = new Date(data!.time).toLocaleString('en-IE', {
 	hour: 'numeric',
 	minute: 'numeric',
 	hour12: false
-}) + "ST" : 'N/A';
+}) + "ST"
 
-const date = data ? new Date(data!.date).toLocaleString('en-IE', {
+const date =  new Date(data!.date).toLocaleString('en-IE', {
 	day: '2-digit',
 	month: 'short',
 	year: '2-digit',
-}) : 'N/A';
+})
 
 const formattedTimeRemaining = computed(() => {
-	if (!data) return 'Invalid date or time'
 	const dateRaw = data?.date // e.g. "2025-09-27T00:00:00.000000Z"
 	const timeRaw = data?.time // e.g. "2025-09-26T15:35:32.000000Z"
 
@@ -73,21 +79,31 @@ const formattedTimeRemaining = computed(() => {
 		<template #header>
 			<div class="h-full flex flex-row items-center justify-start gap-2 p-1 2xl:p-2">
 				<UIcon name="i-heroicons-clock" class="h-4 w-4" />
-				<p class="text-sm text-muted">Next Run: <span class="text-highlighted">{{hour}}, {{date}}</span></p>
+				<p class="text-sm text-muted">Starting At: <span class="text-highlighted">{{hour}}, {{date}}</span></p>
 			</div>
 		</template>
 
 		<div class="h-full grid grid-cols-2">
 			<ScheduleNextChunk
 				class="col-span-1 border-b border-r border-muted/50"
-				title="Seats"
+				title="Seats Filled"
 				:label="`${data.filled_count}/${data.seat_count}`"
 				icon="i-lucide-users" />
 			<ScheduleNextChunk
 				class="col-span-1 border-b border-muted/50"
-				title="Registrations"
-				:label="data.recruiting_count?.toString() ?? '0'"
-				icon="lucide:file-clock" />
+				title="Host"
+				icon="lucide:crown">
+				<template #label>
+					<UUser
+						:name="data.host?.name ?? 'John Doe'"
+						:description="data.host ? `${data.host?.world} - ${data.host?.datacenter}` : 'Balmung - Quicksands'"
+						:avatar="{
+						  src: data.host?.avatar_url ?? 'https://i.pravatar.cc/150?u=john-doe',
+						  icon: 'i-lucide-image'
+						}"
+					/>
+				</template>
+			</ScheduleNextChunk>
 			<ScheduleNextChunk
 				class="col-span-1 border-b border-r border-muted/50"
 				title="Prog Point"
@@ -108,14 +124,12 @@ const formattedTimeRemaining = computed(() => {
 					</div>
 				</template>
 			</ScheduleNextChunk>
-			<ScheduleNextChunk class="col-span-1 border-b border-muted/50" title="Visibility" label="23/48" icon="i-lucide-eye">
+			<ScheduleNextChunk class="col-span-1 border-b border-muted/50" title="Group" label="23/48" icon="ic:baseline-groups">
 				<template #label>
-					<UBadge color="neutral" variant="soft" class="bg-elevated mt-2 p-2" :class="data.public ? 'text-success' : 'text-error'">
-						<p><UIcon :name="data.public ? 'i-lucide-globe' : 'i-lucide-lock'"/> {{data.public ? 'Public' : 'Private'}}</p>
-					</UBadge>
+					<GroupBadge :text="data.group?.badge_text" :color="data.group?.color" :gradient="data.group?.gradient" />
 				</template>
 			</ScheduleNextChunk>
-<!--			This can be adjusted based on the schedule content type-->
+			<!--			This can be adjusted based on the schedule content type-->
 			<div class="col-span-2 flex flex-col items-start justify-start mb-3">
 				<div class="flex flex-col items-start justify-start">
 					<p class="p-2 text-sm font-semibold text-muted">Support Jobs</p>
@@ -140,8 +154,7 @@ const formattedTimeRemaining = computed(() => {
 
 		<template #footer>
 			<div class="h-full flex flex-row items-center justify-between gap-2 p-1 2xl:p-2">
-				<p class="text-xs 2xl:text-sm text-muted">Starting in <span class="text-highlighted">{{formattedTimeRemaining}}</span></p>
-				<ULink href="#" class="text-xs text-primary">View Details</ULink>
+				<p class="text-xs 2xl:text-sm text-muted">Registrations closes in <span class="text-highlighted">{{formattedTimeRemaining}}</span></p>
 			</div>
 		</template>
 	</UCard>

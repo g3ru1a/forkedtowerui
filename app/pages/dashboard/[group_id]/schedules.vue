@@ -42,7 +42,7 @@ const items = ref<BreadcrumbItem[]>([
 		</template>
 		<template #body>
 			<div class="h-screen overflow-y-scroll grid grid-flow-col grid-cols-6 grid-rows-6 2xl:grid-rows-8 gap-4">
-				<div v-if="summary.data" class="col-span-4 row-span-1 gap-4 flex flex-row items-center justify-evenly">
+				<div v-if="summary.success" class="col-span-4 row-span-1 gap-4 flex flex-row items-center justify-evenly">
 					<div class="w-full h-full">
 						<DataCard title="Total Schedules" :value="summary.data.total.toString() ?? '0'" icon="i-lucide-calendar" />
 					</div>

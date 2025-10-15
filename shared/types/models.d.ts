@@ -1,19 +1,9 @@
-export interface Result<T> {
-	success: boolean
-	code?: number
-	data?: T
-	message?: string
-	fromCache?: boolean
-}
-
 export interface APIError {
 	data: {
 		message?: string
 		errors?: Record<string, string[]>
 	}
 }
-
-
 export interface DBCharacter {
 	id: string
 	name: string
@@ -58,14 +48,6 @@ export interface Fight {
 	max_players: number,
 }
 
-export interface FFClass {
-	id: string,
-	name: string,
-	icon_url: string,
-	flat_icon_url: string,
-	type: string
-}
-
 export interface Seat {
 	id: string,
 	schedule: Schedule,
@@ -99,6 +81,7 @@ export interface Schedule {
 	status: string,
 	recruiting_count?: number,
 	filled_count?: number,
+	private_key?: string,
 }
 
 export interface ScheduleSummary {

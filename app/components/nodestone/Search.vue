@@ -1,5 +1,7 @@
 <script setup lang="ts">
+/* eslint-disable  @typescript-eslint/no-explicit-any */
 import type {NodestoneUser} from "#shared/types/nodestone";
+import { useDebounceFn } from '@vueuse/core'
 
 const { $api }=useNuxtApp();
 const value = ref('');
@@ -7,33 +9,57 @@ const searched = ref(false);
 const loading = ref(false);
 const data = ref<NodestoneUser[]>([]);
 const selected = defineModel<NodestoneUser | null>();
+let controller: AbortController | null = null
 
 if(selected.value){
 	value.value = selected.value.name;
 	data.value = [selected.value];
 }
 
-async function search(){
-	loading.value = true;
-	try{
-		const result: APIResponse<NodestoneUser[]> = await $api('/lodestone/search/'+value.value);
-		data.value = result.data;
-		searched.value = true;
+const search = async () => {
+	if (!value.value.trim()) return
+
+	// Cancel previous request
+	if (controller) controller.abort()
+	controller = new AbortController()
+
+	loading.value = true
+	searched.value = false
+
+	try {
+		const result: APIResponse<NodestoneUser[]> = await $api('/lodestone/search/' + value.value, {
+			signal: controller.signal
+		})
+		data.value = result.data
+		searched.value = true
+	} catch (e: any) {
+		if (e.name === 'AbortError') {
+			console.log('Search aborted')
+		} else {
+			console.error(e)
+		}
+	} finally {
 		loading.value = false
-	}catch(e){
-		console.log(e);
 	}
 }
-watch(value, async (newValue, oldValue) => {
-	if(newValue !== oldValue)
-		searched.value = false;
-});
+
+const debouncedSearch = useDebounceFn(search, 600)
+
+watch(value, (newVal, oldVal) => {
+	if (newVal !== oldVal) {
+		searched.value = false
+		if (newVal.trim().length > 2) {
+			debouncedSearch()
+		}
+	}
+})
+
 </script>
 
 <template>
 	<div class="w-full">
 		<UFormField class="w-full" required>
-			<UInput v-model="value" class="w-full" :loading="loading" placeholder="Enter your name">
+			<UInput v-model="value" class="w-full" :loading="loading" placeholder="Enter your name" @keydown.enter="search">
 				<template v-if="value?.length" #trailing>
 					<UTooltip text="Search Lodestone" :content="{ side: 'right' }">
 						<UButton

@@ -1,5 +1,6 @@
 // composables/useAuth.ts
 import type {Schedule, ScheduleSummary} from "#shared/types/models";
+import type { Result } from '#shared/types/common';
 import useScheduleRepository from "~/composables/repositories/useScheduleRepository";
 
 export function useSchedules() {
@@ -8,6 +9,7 @@ export function useSchedules() {
 
 	const scheduleRepo = useScheduleRepository();
 	const schedules = useState('schedules', () => [] as Schedule[]);
+	const canRegisterSchedule = useState('canRegisterSchedule', () => null as Schedule | null);
 
 	async function createSchedule(payload: Partial<Schedule>): Promise<Result<Schedule>>{
 		payload = {
@@ -36,8 +38,11 @@ export function useSchedules() {
 		}else return {
 			success: true,
 			data: schedules.value,
-			fromCache: true,
 		}
+	}
+
+	async function getSchedule(id: string): Promise<Result<Schedule>> {
+		return scheduleRepo.find(id);
 	}
 
 	async function getScheduleSummary(): Promise<Result<ScheduleSummary>> {
@@ -48,5 +53,11 @@ export function useSchedules() {
 		return scheduleRepo.next(groupID.value);
 	}
 
-	return { schedules, getSchedules, createSchedule, getNextSchedule, getScheduleSummary };
+	async function canRegister(schedule_id: string, schedule_secret?: string): Promise<Result<Schedule>> {
+		const result: Result<Schedule> = await scheduleRepo.verify(schedule_id, schedule_secret);
+		canRegisterSchedule.value = result.success ? result.data : null;
+		return result;
+	}
+
+	return { schedules, canRegisterSchedule, getSchedule, getSchedules, createSchedule, getNextSchedule, getScheduleSummary, canRegister };
 }

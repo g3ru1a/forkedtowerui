@@ -1,9 +1,11 @@
 <script  lang="ts" setup="">
 import { getPaginationRowModel } from '@tanstack/vue-table'
+import { useClipboard } from '@vueuse/core'
 import type { TableColumn, DropdownMenuItem } from '@nuxt/ui'
 import {UIcon, UTooltip} from "#components";
 
-
+const toast = useToast()
+const { copy } = useClipboard()
 const UAvatar = resolveComponent('UAvatar')
 const UButton = resolveComponent('UButton')
 
@@ -143,6 +145,23 @@ function getDropdownActions(schedule: Schedule): DropdownMenuItem[][] {
 				label: 'View',
 				icon: 'material-symbols:open-in-new',
 			},
+			{
+				label: 'Copy Registration Link',
+				icon: 'i-lucide-copy',
+				onSelect: () => {
+					const locale = useLocale().locale.value.code;
+					const host = useRequestURL().host+'/'+locale;
+					const link = schedule.public ? host+`/register/${schedule.id}` : host+`/register/${schedule.id}/${schedule.private_key}`;
+					copy(link)
+
+					toast.add({
+						title: 'Link copied to clipboard!',
+						color: 'success',
+						icon: 'i-lucide-circle-check',
+						duration: 1500,
+					})
+				}
+			}
 		],
 		[
 			{
