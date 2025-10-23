@@ -7,6 +7,8 @@ const route = useRoute()
 const router = useRouter()
 const toast = useToast()
 
+const groupStore = useGroupStore();
+
 const open = ref(false)
 const showNotice = ref(true);
 
@@ -15,7 +17,7 @@ const groupID = computed(() => String(route.params.group_id ?? ''))
 if(groupID.value == undefined) await navigateTo('/404');
 
 const { findGroup } = useGroups();
-const group = await findGroup(groupID.value);
+const group = await findGroup(groupID.value, true);
 if(!group) router.push('/404');
 
 const pathTo = (suffix: string) => `/dashboard/${groupID.value}${suffix}`
@@ -43,7 +45,7 @@ const links = computed<NavigationMenuItem[][]>(() => [
 			icon: 'i-lucide-users',
 			to: localePath(pathTo('/participants')),
 			badge: {
-				label: '835',
+				label: groupStore.activeGroup?.participants ?? '0',
 				color: 'info',
 			},
 			onSelect: () => {
@@ -64,7 +66,7 @@ const links = computed<NavigationMenuItem[][]>(() => [
 			to: localePath(pathTo('/registrations')),
 			icon: 'lucide:user-plus',
 			badge: {
-				label: '+143',
+				label: '+'+(groupStore.activeGroup?.registrations ?? '0'),
 				color: 'warning',
 			},
 			active: isActive(pathTo('/registrations')),

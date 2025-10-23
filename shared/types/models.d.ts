@@ -31,6 +31,8 @@ export interface Group {
 	gradient?: string,
 	discord_invite?: string,
 	private_path: string,
+	registrations?: number,
+	participants?: number,
 	members?: User[]
 }
 

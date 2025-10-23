@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import * as z from 'zod'
 import type {FormSubmitEvent, FormErrorEvent, RadioGroupItem} from '@nuxt/ui'
+import {registrationSchemaZod} from '#shared/schemas/registration.schema';
+import type {RegistrationSchema} from '#shared/schemas/registration.schema';
 
-defineProps<{
+const {schedule} = defineProps<{
 	schedule: Schedule,
 }>();
 
 const toast = useToast()
-const route = useRoute()
-const router = useRouter()
+const registrations = useRegistrations();
 
 const { getFFClasses } = useFFClasses()
 const { getPhantomJobs } = usePhantomJobs()
@@ -25,6 +25,9 @@ const selectedPreferredClass = ref<FFClass | null>(null);
 const selectedPhantomJobs = ref<PhantomJob[] | null>(null);
 const selectedPreferredPhantomJob = ref<PhantomJob | null>(null);
 
+const loading = ref(false);
+const registrationSuccess = ref(true);
+
 const characterSelectionTabs = [
 	{
 		label: 'Search Lodestone',
@@ -39,19 +42,6 @@ const characterSelectionTabs = [
 		slot: 'saved'
 	}
 ]
-//
-// const activeTab = computed({
-// 	get() {
-// 		return (route.query.tab as string) || 'saved'
-// 	},
-// 	set(tab) {
-// 		router.push({
-// 			path: route.path,
-// 			query: { tab },
-// 			hash: '#character-selection'
-// 		})
-// 	}
-// })
 
 const characterRadioGroupList = computed<RadioGroupItem[]>(() =>
 	characters ? characters.map((c) => ({
@@ -62,27 +52,6 @@ const characterRadioGroupList = computed<RadioGroupItem[]>(() =>
 		avatar_url: c.avatar_url
 	})) : []
 )
-
-
-const registrationSchema = z.object({
-	character_uuid: z.string().uuid({
-		message: 'Please select a character.'
-	}),
-	preferred_class: z.string().min(1, {
-		message: 'Please select a class.'
-	}),
-	preferred_phantom_job: z.string().min(1, {
-		message: 'Please select a phantom job.'
-	}),
-	alternative_classes: z.array(z.string()).optional(),
-	alternative_phantom_jobs: z.array(z.string()).optional(),
-	can_solo_heal: z.boolean(),
-	can_english: z.boolean(),
-	can_place_markers: z.boolean(),
-	notes: z.string().max(1000).optional()
-})
-
-type RegistrationSchema = z.output<typeof registrationSchema>
 
 const state = reactive<Partial<RegistrationSchema>>({
 	character_uuid: '',
@@ -97,8 +66,19 @@ const state = reactive<Partial<RegistrationSchema>>({
 })
 
 async function onSubmit(event: FormSubmitEvent<RegistrationSchema>) {
-	toast.add({ title: 'Success', description: 'The form has been submitted.', color: 'success' })
-	console.log(event.data)
+	loading.value = true;
+	const payload = registrations.mapToPayload(event.data, schedule.id, schedule.private_key);
+	const result = await registrations.create(payload);
+	console.log(result);
+	if(result.success){
+		registrationSuccess.value = true;
+		toast.add({ title: 'Success', description: "You've registered to the run!", color: 'success' })
+	}else{
+		console.error(result.message, result.errors);
+		toast.add({ title: 'Error', description: result.message, color: 'error' });
+	}
+
+	loading.value = false;
 }
 
 async function onError(event: FormErrorEvent){
@@ -155,15 +135,11 @@ watch(selectedPreferredPhantomJob, (newValue) => {
 	}
 })
 
-watch(state, (newValue) => {
-	console.log(newValue);
-})
-
 </script>
 
 <template>
 	<UCard variant="subtle">
-		<UForm v-if="classes.success && phantomJobs.success" :schema="registrationSchema" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
+		<UForm v-if="!registrationSuccess && classes.success && phantomJobs.success" :schema="registrationSchemaZod" :state="state" class="space-y-4" @submit="onSubmit" @error="onError">
 
 			<UFormField
 				name="character_uuid"
@@ -279,12 +255,30 @@ watch(state, (newValue) => {
 			</UFormField>
 
 			<div class="w-full flex flex-row items-center justify-end">
-				<UButton class="w-full" variant="outline" type="submit">
+				<UButton class="w-full" variant="outline" type="submit" :loading="loading">
 					<p class="text-center w-full">
-						Register
+						{{loading ? 'Submitting...' : 'Submit Registration'}}
 					</p>
 				</UButton>
 			</div>
 		</UForm>
+
+<!--		SUCCESS BLOCK -->
+		<div v-if="registrationSuccess" class="w-full flex flex-col items-center justify-center gap-4 py-8 text-center">
+			<!-- Icon -->
+			<UIcon name="i-lucide-check-circle" class="text-5xl text-success" />
+
+			<!-- Headline -->
+			<h2 class="text-2xl font-semibold text-success">
+				Registration Successful!
+			</h2>
+
+			<!-- Success Message -->
+			<p class="text-muted">
+				Your registration has been received. We'll review it shortly and get in touch if anything needs your attention.
+			</p>
+		</div>
+
+
 	</UCard>
 </template>

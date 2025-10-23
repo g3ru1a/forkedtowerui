@@ -59,5 +59,9 @@ export function useSchedules() {
 		return result;
 	}
 
-	return { schedules, canRegisterSchedule, getSchedule, getSchedules, createSchedule, getNextSchedule, getScheduleSummary, canRegister };
+	async function getScheduleRegistrations(schedule_id: string): Promise<Result<RegistrationResponse[]>> {
+		return scheduleRepo.registrations(schedule_id);
+	}
+
+	return { schedules, canRegisterSchedule, getSchedule, getSchedules, createSchedule, getNextSchedule, getScheduleSummary, canRegister, getScheduleRegistrations };
 }

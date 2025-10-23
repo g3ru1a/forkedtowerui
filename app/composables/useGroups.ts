@@ -1,10 +1,11 @@
 // composables/useAuth.ts
 import { until } from '@vueuse/core'
 import type {Group} from "#shared/types/models";
+import {useGroupStore} from "~/stores/activeGroup";
 
 export function useGroups() {
 	const userStore = useUserStore();
-	const groups = useState('groups', () => [] as Group[]);
+	const groupStore = useGroupStore();
 
 	const create_group_shape = ref<Group>({
 		id: '',
@@ -34,7 +35,7 @@ export function useGroups() {
 	}
 
 	async function getGroups(force = false): Promise<Group[] | null> {
-		if (groups.value.length > 0 && !force) return groups.value;
+		if (groupStore.groups && groupStore.groups.length > 0 && !force) return groupStore.groups;
 		const {data, status, error, refresh} = await useAPI<APIResponse<Group[]>>('/groups', {
 			server: false,
 			immediate: true
@@ -44,11 +45,11 @@ export function useGroups() {
 		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
 
 		if (error.value || data.value == undefined) return null
-		groups.value = data.value.data;
+		groupStore.setGroups(data.value.data);
 		return data.value?.data ?? null
 	}
 
-	async function findGroup(id: string): Promise<Group | null> {
+	async function findGroup(id: string, setActive = false): Promise<Group | null> {
 		const {data, status, error, refresh} = await useAPI<APIResponse<Group>>('/groups/'+id, {
 			server: false,
 			immediate: true
@@ -58,6 +59,7 @@ export function useGroups() {
 		await until(status).not.toBe('idle')                    // or .not.toBe('pending')
 
 		if (error.value || data.value == undefined) return null
+		if(setActive) groupStore.setActiveGroup(groupStore.groups?.find(g => g.id === id) ?? null);
 		return data.value?.data ?? null
 	}
 

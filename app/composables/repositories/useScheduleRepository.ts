@@ -81,6 +81,18 @@ export default function () {
 		}
 	}
 
+	const registrations = async (schedule_id: string): Promise<Result<RegistrationResponse[]>> => {
+		try{
+			const {data} = await $api<APIResponse<RegistrationResponse[]>>(`/schedules/${schedule_id}/registrations`)
+			return {
+				success: true,
+				data: data,
+			}
+		}catch (err){
+			return useParseApiError<RegistrationResponse[]>(err);
+		}
+	}
+
 	return {
 		find,
 		all,
@@ -88,5 +100,6 @@ export default function () {
 		summary,
 		next,
 		verify,
+		registrations
 	}
 }

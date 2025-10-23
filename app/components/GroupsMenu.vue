@@ -18,6 +18,7 @@ const {collapsed = false} = defineProps<{
 }>()
 
 const groups = ref<Group[]>([]);
+const groupStore = useGroupStore();
 const {getGroups} = useGroups();
 
 const selected = ref<GroupDMI | null>(null);
@@ -32,6 +33,7 @@ const items = computed<GroupDMI[]>(() =>
 		badge_gradient: g.gradient,
 		onSelect() {
 			const to = localePath(`/dashboard/${g.id}`)
+			groupStore.setActiveGroup(groupStore.groups?.find(gr => gr.id == g.id) ?? null)
 			if (route.fullPath !== to) {
 				navigateTo(to, { external: true })
 			}
