@@ -62,7 +62,8 @@ watch(selectedRegistration, () => {
 						<ClassIcon v-for="cls in registration.flex_classes" :key="cls.id" :url="cls.flat_icon_url" :alt="cls.name" size="xs" class="brightness-50"/>
 					</div>
 				</div>
-				<div class="flex flex-row items-center justify-start gap-2 flex-wrap">
+<!--				Maybe add some way to limit showing only like 3-4 jobs then show +X for the overflow, same for classes?-->
+				<div class="mt-1 flex flex-row items-center justify-start gap-2 flex-wrap">
 					<JobIcon :url="registration.preferred_job.icon_url" :alt="registration.preferred_job.name" size="md"/>
 					<JobIcon v-for="job in registration.flex_jobs" :key="job.id" :url="job.icon_url" :alt="job.name" size="xs" class="brightness-75"/>
 				</div>
